@@ -1,0 +1,94 @@
+// src/redux/auth.js
+
+// Action Types
+const LOGIN_REQUEST = "auth/LOGIN_REQUEST";
+const LOGIN_SUCCESS = "auth/LOGIN_SUCCESS";
+const LOGIN_FAILURE = "auth/LOGIN_FAILURE";
+
+const REGISTER_REQUEST = "auth/REGISTER_REQUEST";
+const REGISTER_SUCCESS = "auth/REGISTER_SUCCESS";
+const REGISTER_FAILURE = "auth/REGISTER_FAILURE";
+
+const LOGOUT = "auth/LOGOUT";
+
+// Initial State
+const initialState = {
+  user: JSON.parse(localStorage.getItem("user")) || null,
+  token: localStorage.getItem("token") || null,
+  loading: false,
+  error: null,
+};
+
+// Reducer
+export default function authReducer(state = initialState, action) {
+  switch (action.type) {
+    case LOGIN_REQUEST:
+    case REGISTER_REQUEST:
+      return { ...state, loading: true, error: null };
+
+    case LOGIN_SUCCESS:
+      return { ...state, loading: false, user: action.payload.user, token: action.payload.token };
+
+    case REGISTER_SUCCESS:
+      return { ...state, loading: false };
+
+    case LOGIN_FAILURE:
+    case REGISTER_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+
+    case LOGOUT:
+      return { ...state, user: null, token: null };
+
+    default:
+      return state;
+  }
+}
+
+// Action Creators
+
+export const login = (data) => async (dispatch) => {
+  dispatch({ type: LOGIN_REQUEST });
+
+  try {
+    const res = await fetch(`http://localhost:5000/users?email=${data.email}`);
+    const users = await res.json();
+    const user = users[0];
+
+    if (!user || user.password !== data.password) {
+      throw new Error("Неверный email или пароль");
+    }
+
+    const token = "fake-token-" + user.id;
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    dispatch({ type: LOGIN_SUCCESS, payload: { user, token } });
+  } catch (err) {
+    dispatch({ type: LOGIN_FAILURE, payload: err.message });
+  }
+};
+
+export const register = (data) => async (dispatch) => {
+  dispatch({ type: REGISTER_REQUEST });
+
+  try {
+    const res = await fetch("http://localhost:5000/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) throw new Error("Ошибка регистрации");
+
+    await res.json();
+    dispatch({ type: REGISTER_SUCCESS });
+  } catch (err) {
+    dispatch({ type: REGISTER_FAILURE, payload: err.message });
+  }
+};
+
+export const logout = () => (dispatch) => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  dispatch({ type: LOGOUT });
+};

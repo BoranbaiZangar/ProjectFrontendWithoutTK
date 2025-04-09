@@ -1,0 +1,248 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Admin",
+      "email": "admin@example.com",
+      "password": "admin123",
+      "role": "Admin"
+    },
+    {
+      "id": "2",
+      "name": "Owner One",
+      "email": "owner@example.com",
+      "password": "owner123",
+      "role": "Owner"
+    },
+    {
+      "id": "3",
+      "name": "Customer Joe",
+      "email": "customer@example.com",
+      "password": "customer123",
+      "role": "Customer"
+    }
+  ],
+  "restaurants": [
+    {
+      "id": "1",
+      "name": "Owner's Cafe",
+      "description": "Cozy place ",
+      "ownerId": "2",
+      "dishes": [
+        {
+          "id": 2,
+          "name": "Risotto",
+          "price": 13
+        },
+        {
+          "id": 1744207375012,
+          "name": "Pasta",
+          "price": 2
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Sushi World",
+      "description": "Fresh and delicious sushi.",
+      "ownerId": 999,
+      "dishes": [
+        {
+          "id": 3,
+          "name": "California Roll",
+          "price": 8
+        },
+        {
+          "id": 4,
+          "name": "Salmon Nigiri",
+          "price": 9
+        }
+      ]
+    },
+    {
+      "id": "7816",
+      "ownerId": "f9f2",
+      "name": "Tamaq",
+      "description": "The Kazakh resataurant ",
+      "dishes": [
+        {
+          "id": 1744109904425,
+          "name": "Beshbarmaq",
+          "price": 5
+        }
+      ]
+    }
+  ],
+  "orders": [
+    {
+      "id": "1",
+      "userId": 3,
+      "items": [
+        {
+          "name": "Pasta",
+          "price": 11
+        },
+        {
+          "name": "California Roll",
+          "price": 8
+        }
+      ],
+      "status": "Доставлено"
+    },
+    {
+      "id": "2",
+      "userId": 3,
+      "items": [
+        {
+          "name": "Risotto",
+          "price": 13
+        }
+      ],
+      "status": "delivered"
+    },
+    {
+      "id": "784f",
+      "userId": "3",
+      "items": [
+        {
+          "id": 2,
+          "name": "Risotto",
+          "price": 13
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "0c68",
+      "userId": "3",
+      "items": [
+        {
+          "id": 4,
+          "name": "Salmon Nigiri",
+          "price": 9
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "c737",
+      "userId": "3",
+      "items": [
+        {
+          "id": 2,
+          "name": "Risotto",
+          "price": 13
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "e783",
+      "userId": "1",
+      "items": [
+        {
+          "id": 2,
+          "name": "Risotto",
+          "price": 13
+        }
+      ],
+      "status": "delivered"
+    },
+    {
+      "id": "bd72",
+      "userId": "1",
+      "items": [
+        {
+          "id": 2,
+          "name": "Risotto",
+          "price": 13
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "abca",
+      "userId": "2",
+      "items": [
+        {
+          "id": 2,
+          "name": "Risotto",
+          "price": 13
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "82ee",
+      "userId": "3",
+      "items": [
+        {
+          "id": 3,
+          "name": "California Roll",
+          "price": 8
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "f5cf",
+      "userId": "3",
+      "items": [
+        {
+          "id": 1744109904425,
+          "name": "Beshbarmaq",
+          "price": 5
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "1b09",
+      "userId": "3",
+      "items": [
+        {
+          "id": 4,
+          "name": "Salmon Nigiri",
+          "price": 9
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "9917",
+      "userId": "3",
+      "items": [
+        {
+          "id": 4,
+          "name": "Salmon Nigiri",
+          "price": 9
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "2dae",
+      "userId": "3",
+      "items": [
+        {
+          "id": 3,
+          "name": "California Roll",
+          "price": 8
+        }
+      ],
+      "status": "in progress"
+    },
+    {
+      "id": "2e77",
+      "userId": null,
+      "items": [
+        {
+          "id": 2,
+          "name": "Risotto",
+          "price": 13
+        }
+      ],
+      "status": "in progress"
+    }
+  ]
+}
