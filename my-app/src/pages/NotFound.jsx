@@ -5,9 +5,8 @@ const NotFound = () => {
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h1>404</h1>
-      <h2>Страница не найдена</h2>
-      <p>Проверь адрес или вернись на главную.</p>
-      <Link to="/">← На главную</Link>
+      <h2>Page not found!</h2>
+      <Link to="/">← Home</Link>
     </div>
   );
 };

@@ -139,7 +139,7 @@ const OwnerDashboard = () => {
                 }}
               >
                 <span>
-                  <strong>{dish.name}</strong> — ${dish.price}
+                  <strong>{dish.name}</strong> — ₸{dish.price}
                 </span>
                 <button
                   onClick={() => handleDeleteDish(dish.id)}

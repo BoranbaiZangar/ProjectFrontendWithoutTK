@@ -3,6 +3,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/auth";
+import "../css/styles.css"; // Подключаем CSS-файл (проверьте путь)
 
 const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
@@ -15,49 +16,49 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={{ padding: "1rem", borderBottom: "1px solid #ccc", marginBottom: "1rem" }}>
-      <Link to="/" style={{ marginRight: "1rem", fontWeight: "bold" }}>
-        LAMBORJEIMYN
-      </Link>
-
-      <Link to="/restaurants" style={{ marginRight: "1rem" }}>
-        Рестораны
-      </Link>
-
-      {(user?.role === "Customer" || user?.role === "Admin") && (
-  <Link to="/orders" style={{ marginRight: "1rem" }}>
-    Заказы
-  </Link>
-)}
-
-
-      {user?.role === "Owner" && (
-        <Link to="/owner" style={{ marginRight: "1rem" }}>
-          Управление рестораном
+    <nav className="navbar">
+      <div className="navbar-links">
+        <Link to="/" className="navbar-logo">
+        <span style={{ color: "#1abc9c" }}>Lamborjeimyn</span>
         </Link>
-      )}
 
-      {user?.role === "Admin" && (
-        <Link to="/admin" style={{ marginRight: "1rem" }}>
-          Админ-панель
+        <Link to="/restaurants" className="navbar-link">
+          Restaurants
         </Link>
-      )}
 
-      <span style={{ float: "right" }}>
+        {(user?.role === "Customer" || user?.role === "Admin") && (
+          <Link to="/orders" className="navbar-link">
+            Orders
+          </Link>
+        )}
+
+        {user?.role === "Owner" && (
+          <Link to="/owner" className="navbar-link">
+            Restaurant Management
+          </Link>
+        )}
+
+        {user?.role === "Admin" && (
+          <Link to="/admin" className="navbar-link">
+            Admin Panel
+          </Link>
+        )}
+      </div>
+
+      <div className="navbar-auth">
         {user ? (
           <>
-            <span style={{ marginRight: "1rem" }}>Привет, {user.name}</span>
-            <button onClick={handleLogout}>Выйти</button>
+            <span className="navbar-user">Hello, {user.name}</span>
+            <button onClick={handleLogout} className="navbar-button">
+              Logout
+            </button>
           </>
         ) : (
           <>
-            <Link to="/login" style={{ marginRight: "1rem" }}>
-              Войти
-            </Link>
-            <Link to="/register">Зарегистрироваться</Link>
+           
           </>
         )}
-      </span>
+      </div>
     </nav>
   );
 };

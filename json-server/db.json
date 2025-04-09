@@ -1,24 +1,38 @@
 {
   "users": [
     {
-      "id": "1",
-      "name": "Admin",
-      "email": "admin@example.com",
-      "password": "admin123",
-      "role": "Admin"
-    },
-    {
       "id": "2",
       "name": "Owner One",
       "email": "owner@example.com",
-      "password": "owner123",
+      "password": "a2d3a1322b3b52c6e63fb3f8e5c2b60f",
       "role": "Owner"
     },
     {
-      "id": "3",
-      "name": "Customer Joe",
-      "email": "customer@example.com",
-      "password": "customer123",
+      "id": "d9c7",
+      "name": "Zharaskhan",
+      "email": "Zharaskhan@Mail.ru",
+      "password": "4aecdb9a6cbc0f2dec443bf0e281373c",
+      "role": "Customer"
+    },
+    {
+      "id": "4ba7",
+      "name": "ZharaskhanOwner",
+      "email": "ZharaskhanOwner@example.com",
+      "password": "5c92fcb5982675f9e7d50dfcd24e63e9",
+      "role": "Customer"
+    },
+    {
+      "id": "2064",
+      "name": "Admin",
+      "email": "Admin@example.com",
+      "password": "2297aa9f09d86e9af9e1da9467620a7f",
+      "role": "Admin"
+    },
+    {
+      "id": "bd6a",
+      "name": "nanea",
+      "email": "nanea@example.com",
+      "password": "ec4416571fc76c7ddd5f70f68d134296",
       "role": "Customer"
     }
   ],
@@ -42,67 +56,23 @@
       ]
     },
     {
-      "id": "2",
-      "name": "Sushi World",
-      "description": "Fresh and delicious sushi.",
-      "ownerId": 999,
+      "id": "ab44",
+      "ownerId": "4ba7",
+      "name": "Degirmen",
+      "description": "Doners\n",
       "dishes": [
         {
-          "id": 3,
-          "name": "California Roll",
-          "price": 8
-        },
-        {
-          "id": 4,
-          "name": "Salmon Nigiri",
-          "price": 9
-        }
-      ]
-    },
-    {
-      "id": "7816",
-      "ownerId": "f9f2",
-      "name": "Tamaq",
-      "description": "The Kazakh resataurant ",
-      "dishes": [
-        {
-          "id": 1744109904425,
-          "name": "Beshbarmaq",
-          "price": 5
+          "id": 1744227070627,
+          "name": "Doner",
+          "price": 1690
         }
       ]
     }
   ],
   "orders": [
     {
-      "id": "1",
-      "userId": 3,
-      "items": [
-        {
-          "name": "Pasta",
-          "price": 11
-        },
-        {
-          "name": "California Roll",
-          "price": 8
-        }
-      ],
-      "status": "Доставлено"
-    },
-    {
-      "id": "2",
-      "userId": 3,
-      "items": [
-        {
-          "name": "Risotto",
-          "price": 13
-        }
-      ],
-      "status": "delivered"
-    },
-    {
-      "id": "784f",
-      "userId": "3",
+      "id": "5fef",
+      "userId": "d9c7",
       "items": [
         {
           "id": 2,
@@ -110,23 +80,11 @@
           "price": 13
         }
       ],
-      "status": "in progress"
+      "status": "Delivered"
     },
     {
-      "id": "0c68",
-      "userId": "3",
-      "items": [
-        {
-          "id": 4,
-          "name": "Salmon Nigiri",
-          "price": 9
-        }
-      ],
-      "status": "in progress"
-    },
-    {
-      "id": "c737",
-      "userId": "3",
+      "id": "02d6",
+      "userId": "d9c7",
       "items": [
         {
           "id": 2,
@@ -134,11 +92,35 @@
           "price": 13
         }
       ],
-      "status": "in progress"
+      "status": "Delivered"
     },
     {
-      "id": "e783",
-      "userId": "1",
+      "id": "91b3",
+      "userId": "d9c7",
+      "items": [
+        {
+          "id": 1744227070627,
+          "name": "Doner",
+          "price": 1690
+        }
+      ],
+      "status": "Delivered"
+    },
+    {
+      "id": "c2a7",
+      "userId": "d9c7",
+      "items": [
+        {
+          "id": 1744227070627,
+          "name": "Doner",
+          "price": 1690
+        }
+      ],
+      "status": "Delivered"
+    },
+    {
+      "id": "088b",
+      "userId": "d9c7",
       "items": [
         {
           "id": 2,
@@ -146,11 +128,35 @@
           "price": 13
         }
       ],
-      "status": "delivered"
+      "status": "Delivered"
     },
     {
-      "id": "bd72",
-      "userId": "1",
+      "id": "1784",
+      "userId": "bd6a",
+      "items": [
+        {
+          "id": 1744227070627,
+          "name": "Doner",
+          "price": 1690
+        }
+      ],
+      "status": "Delivered"
+    },
+    {
+      "id": "acfc",
+      "userId": "d9c7",
+      "items": [
+        {
+          "id": 1744227070627,
+          "name": "Doner",
+          "price": 1690
+        }
+      ],
+      "status": "In Transit"
+    },
+    {
+      "id": "2754",
+      "userId": "d9c7",
       "items": [
         {
           "id": 2,
@@ -158,11 +164,11 @@
           "price": 13
         }
       ],
-      "status": "in progress"
+      "status": "In Transit"
     },
     {
-      "id": "abca",
-      "userId": "2",
+      "id": "b189",
+      "userId": "d9c7",
       "items": [
         {
           "id": 2,
@@ -170,79 +176,7 @@
           "price": 13
         }
       ],
-      "status": "in progress"
-    },
-    {
-      "id": "82ee",
-      "userId": "3",
-      "items": [
-        {
-          "id": 3,
-          "name": "California Roll",
-          "price": 8
-        }
-      ],
-      "status": "in progress"
-    },
-    {
-      "id": "f5cf",
-      "userId": "3",
-      "items": [
-        {
-          "id": 1744109904425,
-          "name": "Beshbarmaq",
-          "price": 5
-        }
-      ],
-      "status": "in progress"
-    },
-    {
-      "id": "1b09",
-      "userId": "3",
-      "items": [
-        {
-          "id": 4,
-          "name": "Salmon Nigiri",
-          "price": 9
-        }
-      ],
-      "status": "in progress"
-    },
-    {
-      "id": "9917",
-      "userId": "3",
-      "items": [
-        {
-          "id": 4,
-          "name": "Salmon Nigiri",
-          "price": 9
-        }
-      ],
-      "status": "in progress"
-    },
-    {
-      "id": "2dae",
-      "userId": "3",
-      "items": [
-        {
-          "id": 3,
-          "name": "California Roll",
-          "price": 8
-        }
-      ],
-      "status": "in progress"
-    },
-    {
-      "id": "2e77",
-      "userId": null,
-      "items": [
-        {
-          "id": 2,
-          "name": "Risotto",
-          "price": 13
-        }
-      ],
-      "status": "in progress"
+      "status": "In Transit"
     }
   ]
 }

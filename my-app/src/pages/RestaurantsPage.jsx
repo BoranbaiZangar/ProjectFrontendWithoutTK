@@ -13,18 +13,29 @@ const RestaurantsPage = () => {
   }, [dispatch]);
 
   return (
-    <div>
+    <div className="container">
       <h2>Restaurants</h2>
       {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
+      {error && <p style={{ color: "#D81B60" }}>{error}</p>}
 
-      <ul>
+      {list.length === 0 && !loading && !error && (
+        <p>Restaurants have not been added yet.</p>
+      )}
+
+      <div className="restaurants-catalog">
         {list.map((r) => (
-          <li key={r.id}>
-            <Link to={`/restaurants/${r.id}`}>{r.name}</Link>
-          </li>
+          <Link
+            to={`/restaurants/${r.id}`}
+            key={r.id}
+            className="restaurant-card"
+          >
+            <div className="restaurant-content">
+              <h3>{r.name}</h3>
+              <p>{r.description || "Description is missing"}</p>
+            </div>
+          </Link>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

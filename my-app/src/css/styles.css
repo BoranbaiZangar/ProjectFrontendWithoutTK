@@ -1,0 +1,442 @@
+/* Сброс стандартных стилей */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Базовые стили для body */
+body {
+  font-family: 'Arial', sans-serif;
+  background: #FFF8E1;
+  color: #2c2c2c;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Контейнер */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Заголовки */
+h1, h2, h3 {
+  font-family: 'Arial', sans-serif;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+/* Ссылки */
+a {
+  font-size: 1.2rem;
+  color: #2c2c2c; /* Темно-зеленый */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #1abc9c; /* Желтый при наведении */
+}
+
+/* Кнопки */
+button {
+  background: #2c2c2c; /* Темно-зеленый */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #1abc9c; /* Желтый при наведении */
+}
+
+button:disabled {
+  background: #90A4AE;
+  cursor: not-allowed;
+}
+
+/* Формы */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+input, textarea, select {
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+  transition: border-color 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #FF7043; /* Оранжевый при фокусе */
+  outline: none;
+}
+
+/* Таблицы */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+th {
+  background: #FFF8E1;
+  color: #2c2c2c;
+  font-weight: 600;
+}
+
+tr:hover {
+  background: rgba(46, 125, 50, 0.05); /* Легкий темно-зеленый ховер */
+}
+
+/* Сообщения об ошибках */
+p[style*="color: red"] {
+  color: #D81B60;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+/* Каталог ресторанов с горизонтальной прокруткой */
+.restaurants-catalog {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Скрываем стандартный скроллбар, но оставляем прокрутку */
+.restaurants-catalog::-webkit-scrollbar {
+  height: 8px;
+}
+
+.restaurants-catalog::-webkit-scrollbar-thumb {
+  background: #2E7D32; /* Темно-зеленый скроллбар */
+  border-radius: 4px;
+}
+
+.restaurants-catalog::-webkit-scrollbar-track {
+  background: #FFF8E1;
+}
+
+/* Карточка ресторана */
+.restaurant-card {
+  flex: 0 0 300px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  scroll-snap-align: start;
+  text-decoration: none;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Контент внутри карточки */
+.restaurant-content {
+  padding: 15px;
+}
+
+.restaurant-content h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #2c2c2c;
+}
+
+.restaurant-content p {
+  font-size: 0.9rem;
+  color: #2c2c2c;
+  opacity: 0.7;
+}
+/* Restaurant Detail Page */
+.restaurant-detail {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.restaurant-title {
+  font-size: 2.5rem;
+  color: #0b6e5b;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.restaurant-description {
+  font-size: 1.1rem;
+  color: #2c2c2c;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.owner-info {
+  background: #FFF8E1;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 2rem;
+}
+
+.owner-info h3 {
+  font-size: 1.3rem;
+  color: #2E7D32;
+  margin-bottom: 0.5rem;
+}
+
+.owner-name {
+  font-weight: bold;
+  color: #14312b;
+}
+
+.owner-contact {
+  font-size: 0.9rem;
+  color: #2c2c2c;
+  opacity: 0.7;
+}
+
+.rating-info {
+  margin-bottom: 2rem;
+}
+
+.rating-info h3 {
+  font-size: 1.3rem;
+  color: #1abc9c;
+  margin-bottom: 0.5rem;
+}
+
+.rating-info p {
+  font-size: 0.95rem;
+  color: #2c2c2c;
+  font-style: italic;
+}
+
+.menu-title {
+  font-size: 1.8rem;
+  color: #1abc9c;
+  margin-bottom: 1rem;
+}
+
+.dishes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.no-dishes {
+  font-size: 1rem;
+  color: #2c2c2c;
+  opacity: 0.7;
+  text-align: center;
+}
+
+.loading {
+  font-size: 1.2rem;
+  color: #2E7D32;
+  text-align: center;
+}
+
+.error {
+  font-size: 1.2rem;
+  color: #D81B60;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.not-found {
+  font-size: 1.2rem;
+  color: #2c2c2c;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .restaurant-detail {
+    padding: 15px;
+  }
+
+  .restaurant-title {
+    font-size: 2rem;
+  }
+
+  .menu-title {
+    font-size: 1.5rem;
+  }
+
+  .owner-info h3,
+  .rating-info h3 {
+    font-size: 1.2rem;
+  }
+}
+/* Навбар */
+.navbar {
+  padding: 1rem;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 1rem auto;
+}
+
+.navbar-logo {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #1abc9c;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.navbar-logo:hover {
+  color: #1abc9c;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar-link {
+  color: #1abc9c;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: color 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: #1abc9c;
+}
+
+.navbar-button {
+  background: #2E7D32;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.navbar-button:hover {
+  background: #1abc9c;
+}
+
+.navbar-user {
+  color: #2c2c2c;
+  font-size: 1rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  table, th, td {
+    font-size: 0.9rem;
+  }
+
+  .restaurant-card {
+    flex: 0 0 250px;
+  }
+
+  .navbar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .navbar-auth {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .navbar-logo {
+    font-size: 1.2rem;
+  }
+}

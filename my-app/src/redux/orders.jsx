@@ -44,8 +44,8 @@ export const fetchOrders = (userId) => async (dispatch) => {
     dispatch({ type: FETCH_ORDERS_FAILURE, payload: err.message });
   }
 };
-// ✅ ДОБАВЬ внизу файла redux/orders.js
 
+// Экшен для обновления статуса заказа
 export const updateOrderStatus = (orderId, newStatus) => async (dispatch) => {
   try {
     const res = await fetch(`http://localhost:5000/orders/${orderId}`);
@@ -59,9 +59,28 @@ export const updateOrderStatus = (orderId, newStatus) => async (dispatch) => {
       body: JSON.stringify(updatedOrder),
     });
 
-    dispatch(fetchOrders("ALL")); // перезагружаем список заказов
+    dispatch(fetchOrders("ALL"));
   } catch (err) {
     console.error("Ошибка при обновлении статуса:", err);
   }
 };
 
+// Экшен для отмены заказа
+export const cancelOrder = (orderId) => async (dispatch) => {
+  try {
+    const res = await fetch(`http://localhost:5000/orders/${orderId}`);
+    const order = await res.json();
+
+    const updatedOrder = { ...order, status: "Отменен" };
+
+    await fetch(`http://localhost:5000/orders/${orderId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedOrder),
+    });
+
+    dispatch(fetchOrders("ALL"));
+  } catch (error) {
+    console.error("Ошибка при отмене заказа", error);
+  }
+};
