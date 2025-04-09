@@ -1,10 +1,10 @@
 // src/redux/store.js
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./authSlice";
-import restaurantReducer from "./restaurantSlice";
-import orderReducer from "./orderSlice";
-import userReducer from "./userSlice";
-import dishReducer from "./dishSlice";
+import authReducer from "./auth";
+import restaurantReducer from "./restaurants";
+import orderReducer from "./orders";
+import userReducer from "./auth";
+import dishReducer from "./dishes";
 
 const store = configureStore({
   reducer: {

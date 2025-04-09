@@ -1,12 +1,11 @@
-import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchOrders } from "../redux/orderSlice";
+import { fetchOrders, updateOrderStatus } from "../redux/orders";
+import { useEffect } from "react";
 
 const OrdersPage = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { list: orders, loading, error } = useSelector((state) => state.orders);
-  const statuses = ["in progress", "confirmed", "delivered", "cancelled"];
+  const { list, loading, error } = useSelector((state) => state.orders);
 
   useEffect(() => {
     if (user) {
@@ -14,103 +13,62 @@ const OrdersPage = () => {
     }
   }, [dispatch, user]);
 
-  const handleStatusChange = async (orderId, newStatus) => {
-    const order = orders.find((o) => o.id === orderId);
-    const updatedOrder = { ...order, status: newStatus };
-
-    await fetch(`http://localhost:5000/orders/${orderId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedOrder),
-    });
-
-    dispatch(fetchOrders(user.role === "Admin" ? "ALL" : user.id));
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "in progress":
-        return "#f1c40f"; // жёлтый
-      case "confirmed":
-        return "#3498db"; // синий
-      case "delivered":
-        return "#2ecc71"; // зелёный
-      case "cancelled":
-        return "#e74c3c"; // красный
-      default:
-        return "#999";
+  const handleStatusChange = (orderId, currentStatus) => {
+    const newStatus = prompt("Введите новый статус заказа:", currentStatus);
+    if (newStatus && newStatus !== currentStatus) {
+      dispatch(updateOrderStatus(orderId, newStatus));
     }
   };
 
-  if (loading) return <p>Загрузка заказов...</p>;
-  if (error) return <p>Ошибка: {error}</p>;
-
   return (
     <div>
-      <h2>{user.role === "Admin" ? "Все заказы" : "Мои заказы"}</h2>
-      {orders.length === 0 ? (
-        <p>Нет заказов</p>
-      ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {orders.map((order) => (
-            <li
-              key={order.id}
+      <h2>Заказы</h2>
+      {loading && <p>Загрузка...</p>}
+      {error && (
+        <p style={{ color: "red" }}>
+          {typeof error === "string" ? error : JSON.stringify(error)}
+        </p>
+      )}
+
+      {list.map((order) => (
+        <div
+          key={order.id}
+          style={{
+            border: "1px solid #ccc",
+            padding: "1rem",
+            marginBottom: "1rem",
+            borderRadius: "8px",
+            backgroundColor: "#f9f9f9",
+          }}
+        >
+          <strong>Заказ #{order.id}</strong>
+          <ul>
+            {order.items.map((item, index) => (
+              <li key={index}>
+                {item.name} — ${item.price}
+              </li>
+            ))}
+          </ul>
+          <p>Статус: {order.status}</p>
+
+          {user?.role === "Admin" && (
+            <button
+              onClick={() => handleStatusChange(order.id, order.status)}
               style={{
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                padding: "1rem",
-                marginBottom: "1rem",
+                marginTop: "0.5rem",
+                padding: "0.4rem 1rem",
+                backgroundColor: "#2980b9",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
               }}
             >
-              <strong>Заказ #{order.id}</strong>
-              {user.role === "Admin" && (
-                <p>Клиент: User #{order.userId}</p>
-              )}
-
-              <ul>
-                {order.items.map((item, index) => (
-                  <li key={index}>
-                    {item.name} — ${item.price}
-                  </li>
-                ))}
-              </ul>
-
-              {user.role === "Admin" ? (
-                <>
-                  <label>Статус: </label>
-                  <select
-                    value={order.status}
-                    onChange={(e) =>
-                      handleStatusChange(order.id, e.target.value)
-                    }
-                  >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </>
-              ) : (
-                <p>
-                  Статус:{" "}
-                  <span
-                    style={{
-                      padding: "4px 8px",
-                      borderRadius: "5px",
-                      backgroundColor: getStatusColor(order.status),
-                      color: "#fff",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {order.status}
-                  </span>
-                </p>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+              Сменить статус
+            </button>
+          )}
+        </div>
+      ))}
     </div>
   );
 };

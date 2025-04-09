@@ -6,7 +6,7 @@ const Toast = ({ message, type }) => {
 
   return (
     <div style={{ ...style, background }}>
-      {message}
+      {typeof message === "string" ? message : JSON.stringify(message)}
     </div>
   );
 };

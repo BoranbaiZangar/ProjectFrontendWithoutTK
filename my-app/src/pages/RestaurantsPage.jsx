@@ -1,7 +1,7 @@
 // src/pages/RestaurantsPage.js
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchRestaurants } from "../redux/restaurantSlice";
+import { fetchRestaurants } from "../redux/restaurants";
 import { Link } from "react-router-dom";
 
 const RestaurantsPage = () => {

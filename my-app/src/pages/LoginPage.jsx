@@ -1,32 +1,47 @@
-// src/pages/LoginPage.js
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { loginUser } from "../redux/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../redux/auth";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const [form, setForm] = useState({ email: "", password: "" });
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const { loading, error } = useSelector((state) => state.auth);
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await dispatch(loginUser(form));
-    if (result.meta.requestStatus === "fulfilled") {
-      navigate("/");
-    }
+    await dispatch(login(form));
+    navigate("/");
   };
 
   return (
     <div>
-      <h2>Login</h2>
+      <h2>Вход</h2>
       <form onSubmit={handleSubmit}>
-        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" required />
-        <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Password" required />
-        <button type="submit">Login</button>
+        <input
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          placeholder="Email"
+          required
+        />
+        <input
+          name="password"
+          type="password"
+          value={form.password}
+          onChange={handleChange}
+          placeholder="Пароль"
+          required
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? "Загрузка..." : "Войти"}
+        </button>
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
     </div>
   );
