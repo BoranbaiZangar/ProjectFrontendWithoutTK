@@ -23,7 +23,7 @@ const HomePage = () => {
         gap: "0.5rem"
       }}>
     <span>Welcome to</span>
-    <span style={{ color: "#1abc9c" }}>Lamborjeimyn!</span>
+    <span style={{ color: "#3E2A1D" }}>Lamborjeimyn!</span>
   </h1>
       <p style={{ 
         fontSize: "1.2rem",

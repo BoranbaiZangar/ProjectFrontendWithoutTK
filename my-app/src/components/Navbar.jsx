@@ -1,25 +1,30 @@
 // src/components/Navbar.js
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/auth";
-import "../css/styles.css"; // Подключаем CSS-файл (проверьте путь)
+import "../css/styles.css"; // Подключаем CSS-файл
 
 const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation(); // Получаем текущий URL
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login");
   };
 
+  // Определяем, какую ссылку показывать: "Login" или "Register"
+  const isLoginPage = location.pathname === "/login";
+  const isRegisterPage = location.pathname === "/register";
+
   return (
     <nav className="navbar">
       <div className="navbar-links">
         <Link to="/" className="navbar-logo">
-        <span style={{ color: "#1abc9c" }}>Lamborjeimyn</span>
+          <span style={{ color: "#3E2A1D" }}>Lamborjeimyn</span>
         </Link>
 
         <Link to="/restaurants" className="navbar-link">
@@ -55,7 +60,18 @@ const Navbar = () => {
           </>
         ) : (
           <>
-           
+            {isLoginPage && (
+              <Link to="/register" className="navbar-button">
+                Register
+              </Link>
+            )}
+            {isRegisterPage && (
+              <Link to="/login" className="navbar-button">
+                Login
+              </Link>
+            )}
+            {/* Если пользователь не на странице логина или регистрации, показываем обе ссылки */}
+            
           </>
         )}
       </div>
