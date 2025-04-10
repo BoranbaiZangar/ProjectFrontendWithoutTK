@@ -8,11 +8,11 @@ const OrdersPage = () => {
   const { list, loading, error } = useSelector((state) => state.orders);
 
   const statuses = ["Processing", "In Transit", "Delivered"];
-  const allStatuses = ["In Progress", "Processing", "In Transit", "Delivered", "Cancelled"];
+  const allStatuses = ["In progress", "Processing", "In Transit", "Delivered", "Cancelled"];
 
   // Тасырыстардың статустарының түсі.
   const statusColors = {
-    "In Progress": "#f39c12",
+    "In progress": "#f39c12",
     "Processing": "#3498db",
     "In Transit": "#9b59b6",
     "Delivered": "#2ecc71",
@@ -95,7 +95,7 @@ const OrdersPage = () => {
             </div>
           )}
           {/* Сатушы рөліндегі адам тек в прогрессе деген жағдайда, тапсырыстан бас тарта алалады. */}
-          {user?.role === "Customer" && order.status === "In Progress" && (
+          {user?.role === "Customer" && order.status === "In progress" && (
             <div>
               <button
                 onClick={() => handleCancelOrder(order.id)}

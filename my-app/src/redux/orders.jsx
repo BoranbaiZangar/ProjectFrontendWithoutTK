@@ -71,7 +71,7 @@ export const cancelOrder = (orderId) => async (dispatch) => {
     const res = await fetch(`http://localhost:5000/orders/${orderId}`);
     const order = await res.json();
 
-    const updatedOrder = { ...order, status: "Отменен" };
+    const updatedOrder = { ...order, status: "Cancelled" };
 
     await fetch(`http://localhost:5000/orders/${orderId}`, {
       method: "PUT",

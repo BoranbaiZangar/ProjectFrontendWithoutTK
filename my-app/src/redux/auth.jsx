@@ -1,27 +1,32 @@
 // src/redux/auth.js
 import md5 from "md5"; // Құпиясөзді шифрлауға арналған md5 кітапханасы
 
-// 🏷 Акшн түрлері (Action Types): Бұл жерде әрекеттердің типтерін анықтаймыз
-const LOGIN_REQUEST = "auth/LOGIN_REQUEST"; // Кіру әрекетін бастаған кезде
-const LOGIN_SUCCESS = "auth/LOGIN_SUCCESS"; // Кіру әрекеті сәтті аяқталғанда
-const LOGIN_FAILURE = "auth/LOGIN_FAILURE"; // Кіру әрекетінде қате пайда болғанда
+// 🏷 Акшн түрлері (Action Types):
+// Бұл жерде әрекеттердің типтерін анықтаймыз
+const LOGIN_REQUEST = "auth/LOGIN_REQUEST"; 
+const LOGIN_SUCCESS = "auth/LOGIN_SUCCESS";
+const LOGIN_FAILURE = "auth/LOGIN_FAILURE";
 
-const REGISTER_REQUEST = "auth/REGISTER_REQUEST"; // Тіркелу әрекетін бастаған кезде
-const REGISTER_SUCCESS = "auth/REGISTER_SUCCESS"; // Тіркелу әрекеті сәтті аяқталғанда
-const REGISTER_FAILURE = "auth/REGISTER_FAILURE"; // Тіркелу әрекетінде қате пайда болғанда
+const REGISTER_REQUEST = "auth/REGISTER_REQUEST"; 
+const REGISTER_SUCCESS = "auth/REGISTER_SUCCESS"; 
+const REGISTER_FAILURE = "auth/REGISTER_FAILURE"; 
 
-const LOGOUT = "auth/LOGOUT"; // Жүйеден шығу әрекеті
-const CHANGE_USER_ROLE = "auth/CHANGE_USER_ROLE"; // Жаңа әрекет: қолданушы рөлін өзгерту
+// жүйеден шығу әрекеті
+const LOGOUT = "auth/LOGOUT";
+// жаңа әрекет: қолданушы рөлін өзгерту 
+const CHANGE_USER_ROLE = "auth/CHANGE_USER_ROLE"; 
 
-// 🌐 Бастапқы күй (Initial State): Бұл жерде бастапқы мәліметтерді анықтаймыз
+// Бастапқы күй (Initial State): 
+// Бұл жерде бастапқы мәліметтерді анықтаймыз
 const initialState = {
-  user: JSON.parse(localStorage.getItem("user")) || null, // localStorage-тан қолданушыны аламыз, егер жоқ болса null
-  token: localStorage.getItem("token") || null, // localStorage-тан токенді аламыз, егер жоқ болса null
-  loading: false, // Жүктелу күйі (true болса, бірдеңе жүктеліп жатыр)
-  error: null, // Қате болса, оны сақтаймыз
+  user: JSON.parse(localStorage.getItem("user")) || null, 
+  token: localStorage.getItem("token") || null, 
+  loading: false, 
+  error: null, 
 };
 
-// 🔁 Редюсер: Бұл функция күйді (state) басқарады және әрекеттерге (actions) байланысты күйді өзгертеді
+// 🔁 Редюсер: Бұл функция күйді (state) 
+// басқарады және әрекеттерге (actions) байланысты күйді өзгертеді
 export default function authReducer(state = initialState, action) {
   switch (action.type) {
     case LOGIN_REQUEST:
@@ -31,9 +36,9 @@ export default function authReducer(state = initialState, action) {
     case LOGIN_SUCCESS:
       return {
         ...state,
-        loading: false, // Жүктелу аяқталды
-        user: action.payload.user, // Қолданушы мәліметтерін сақтаймыз
-        token: action.payload.token, // Токенді сақтаймыз
+        loading: false, 
+        user: action.payload.user, 
+        token: action.payload.token,
       };
 
     case REGISTER_SUCCESS:
@@ -74,12 +79,12 @@ export const login = (data) => async (dispatch) => {
 
     // Егер қолданушы табылмаса, қате шығарамыз
     if (!user) {
-      throw new Error("Осы почтамен қолданушы табылмады");
+      throw new Error("No user found with this email address.");
     }
 
     // Шифрланған құпиясөздерді салыстырамыз
     if (user.password !== hashedPassword) {
-      throw new Error("Құпиясөз қате");
+      throw new Error("Password incorrect");
     }
 
     // Токен жасаймыз (жалған токен, мысал ретінде)
@@ -108,7 +113,7 @@ export const register = (data) => async (dispatch) => {
 
     // Егер осы почта бұрыннан тіркелген болса, қате шығарамыз
     if (users.length > 0) {
-      throw new Error("Осы почта бұрыннан тіркелген");
+      throw new Error("This email is already registered.");
     }
 
     // Құпиясөзді шифрлаймыз және қолданушы мәліметтерін дайындаймыз
@@ -123,7 +128,7 @@ export const register = (data) => async (dispatch) => {
     });
 
     // Егер сұрау сәтсіз болса, қате шығарамыз
-    if (!res.ok) throw new Error("Тіркелу кезінде қате пайда болды");
+    if (!res.ok) throw new Error("An error occurred during registration.");
 
     await res.json();
     dispatch({ type: REGISTER_SUCCESS }); // Тіркелу сәтті болды
@@ -143,7 +148,7 @@ export const updateUserRoleOnServer = (userId, newRole) => async (dispatch) => {
     });
 
     if (!res.ok) {
-      throw new Error("Серверде рөлді жаңарту кезінде қате пайда болды");
+      throw new Error("An error occurred while updating the role on the server.");
     }
 
     const updatedUser = await res.json();

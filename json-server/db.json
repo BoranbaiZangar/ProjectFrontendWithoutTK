@@ -5,9 +5,86 @@
       "name": "Admin",
       "email": "Admin@example.com",
       "password": "2297aa9f09d86e9af9e1da9467620a7f",
-      "role": "Admin"
+      "role": "Owner"
+    },
+    {
+      "id": "09b0",
+      "name": "Zharaskhan Miramuly",
+      "email": "Zharaskhan@mail.ru",
+      "password": "4aecdb9a6cbc0f2dec443bf0e281373c",
+      "role": "Owner"
+    },
+    {
+      "id": "5f09",
+      "name": "Owner Owner",
+      "email": "owner@example.com",
+      "password": "46341f3fdb16e9d315370617453fb4ed",
+      "role": "Owner"
+    },
+    {
+      "id": "76db",
+      "name": "Customer Customer",
+      "email": "Customer@example.com",
+      "password": "39dcff5e56fe91c92dacfdd112bdee9a",
+      "role": "Customer"
     }
   ],
-  "restaurants": [],
-  "orders": []
+  "restaurants": [
+    {
+      "id": "8d8b",
+      "ownerId": "5f09",
+      "name": "Donerka",
+      "description": "Tatty donerler satylady",
+      "dishes": [
+        {
+          "id": 1744265758451,
+          "name": "Doner tatty",
+          "price": 1690
+        },
+        {
+          "id": 1744265765673,
+          "name": "Doner odinoy",
+          "price": 1790
+        }
+      ]
+    }
+  ],
+  "orders": [
+    {
+      "id": "d333",
+      "userId": "76db",
+      "items": [
+        {
+          "id": 1744265758451,
+          "name": "Doner Govyadina",
+          "price": 1690
+        }
+      ],
+      "status": "Cancelled"
+    },
+    {
+      "id": "740f",
+      "userId": "76db",
+      "items": [
+        {
+          "id": 1744265758451,
+          "name": "Doner Govyadina",
+          "price": 1690
+        }
+      ],
+      "status": "Delivered"
+    },
+    {
+      "id": "b002",
+      "userId": "76db",
+      "items": [
+        {
+          "id": 1744265765673,
+          "name": "Doner odinoy",
+          "price": 1790
+        }
+      ],
+      "status": "Delivered"
+    }
+  ]
 }
