@@ -27,6 +27,55 @@
       "email": "m_jasik_2005@mail.ru",
       "password": "5bcc6f5c1862b40bc289fabe2e2edd62",
       "role": "Customer"
+    },
+    {
+      "id": "0ad2",
+      "name": "Я",
+      "email": "azicussdu@gmail.com",
+      "password": "676838ba18c88723486d2a70424e49a2",
+      "role": "Customer"
+    },
+    {
+      "id": "5f4f",
+      "name": "s",
+      "email": "s",
+      "password": "03c7c0ace395d80182db07ae2c30f034",
+      "role": "Customer"
+    },
+    {
+      "id": "b708",
+      "name": "Zharaskhan",
+      "email": "m_jasik_2005@gmail.com",
+      "password": "68f1719a7cd971de3a52a52c3c04ea62",
+      "role": "Customer"
+    },
+    {
+      "id": "80f0",
+      "name": "Jostok",
+      "email": "Jostok@gmail.com",
+      "password": "cb044ef7a4ecbce21d56a19f9360741f",
+      "role": "Customer"
+    },
+    {
+      "id": "c68b",
+      "name": "Jasik2005",
+      "email": "m_jasik_2005@gmaill.com",
+      "password": "ee455e42537b2daa8e0a6040e0e0e926",
+      "role": "Owner"
+    },
+    {
+      "id": "1a92",
+      "name": "Zharaskhan",
+      "email": "Zharaskhan@gmail.com",
+      "password": "a7ea386efce993b17d6a96ed74d14548",
+      "role": "Customer"
+    },
+    {
+      "id": "98b7",
+      "name": "order",
+      "email": "order@mail.ru",
+      "password": "70a17ffa722a3985b86d30b034ad06d7",
+      "role": "Owner"
     }
   ],
   "restaurants": [
@@ -250,6 +299,18 @@
         }
       ],
       "status": "in progress"
+    },
+    {
+      "id": "5cef",
+      "userId": "0ad2",
+      "items": [
+        {
+          "id": 1744207375012,
+          "name": "Pasta",
+          "price": 2
+        }
+      ],
+      "status": "In progress"
     }
   ]
 }
