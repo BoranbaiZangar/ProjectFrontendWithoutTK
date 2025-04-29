@@ -37,51 +37,79 @@ const AdminPanel = () => {
   };
 
   const handleDeleteConfirmed = async () => {
-    await fetch(`http://localhost:5000/users/${selectedUserId}`, {
-      method: "DELETE",
-    });
-    setShowConfirm(false);
-    setSelectedUserId(null);
-    fetchUsers();
+    try {
+      const userToDelete = users.find((u) => u.id === selectedUserId);
+      if (!userToDelete) {
+        throw new Error("User not found");
+      }
+
+      if (userToDelete.role === "Owner") {
+        const resRestaurants = await fetch(
+          `http://localhost:5000/restaurants?ownerId=${selectedUserId}`
+        );
+        const restaurants = await resRestaurants.json();
+
+        for (const restaurant of restaurants) {
+          await fetch(`http://localhost:5000/restaurants/${restaurant.id}`, {
+            method: "DELETE",
+          });
+        }
+      } else if (userToDelete.role === "Customer") {
+        const resOrders = await fetch(
+          `http://localhost:5000/orders?userId=${selectedUserId}`
+        );
+        const orders = await resOrders.json();
+
+        for (const order of orders) {
+          await fetch(`http://localhost:5000/orders/${order.id}`, {
+            method: "DELETE",
+          });
+        }
+      }
+
+      await fetch(`http://localhost:5000/users/${selectedUserId}`, {
+        method: "DELETE",
+      });
+
+      setShowConfirm(false);
+      setSelectedUserId(null);
+      fetchUsers();
+    } catch (err) {
+      console.error("Қолданушыны жою кезінде қате пайда болды:", err.message);
+      setShowConfirm(false);
+      setSelectedUserId(null);
+    }
   };
 
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-      <h2 style={{ marginBottom: "1rem" }}>Админ-панель</h2>
+    <div className="admin-panel container">
+      <h2>Admin Panel</h2>
       {users.length === 0 ? (
-        <p>Нет пользователей</p>
+        <p className="no-users">No users found</p>
       ) : (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            overflow: "hidden",
-          }}
-        >
-          <thead style={{ backgroundColor: "#f5f5f5" }}>
+        <table className="admin-table">
+          <thead>
             <tr>
-              <th style={thStyle}>ID</th>
-              <th style={thStyle}>Имя</th>
-              <th style={thStyle}>Email</th>
-              <th style={thStyle}>Роль</th>
-              <th style={thStyle}>Изменить</th>
-              <th style={thStyle}>Удалить</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Change Role</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={tdStyle}>{u.id}</td>
-                <td style={tdStyle}>{u.name}</td>
-                <td style={tdStyle}>{u.email}</td>
-                <td style={tdStyle}>{u.role}</td>
-                <td style={tdStyle}>
+              <tr key={u.id}>
+                <td>{u.id}</td>
+                <td>{u.name}</td>
+                <td>{u.email}</td>
+                <td>{u.role}</td>
+                <td>
                   <select
                     value={u.role}
                     onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                    style={{ padding: "0.3rem", borderRadius: "4px" }}
+                    className="role-select"
                   >
                     {roles.map((r) => (
                       <option key={r} value={r}>
@@ -90,19 +118,12 @@ const AdminPanel = () => {
                     ))}
                   </select>
                 </td>
-                <td style={tdStyle}>
+                <td>
                   <button
                     onClick={() => confirmDelete(u.id)}
-                    style={{
-                      backgroundColor: "#e74c3c",
-                      color: "#fff",
-                      padding: "0.4rem 0.8rem",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
+                    className="delete-button"
                   >
-                    Удалить
+                    Delete
                   </button>
                 </td>
               </tr>
@@ -113,23 +134,13 @@ const AdminPanel = () => {
 
       {showConfirm && (
         <ConfirmModal
-          message="Удалить пользователя?"
+          message="Are you sure you want to delete this user?"
           onConfirm={handleDeleteConfirmed}
           onCancel={() => setShowConfirm(false)}
         />
       )}
     </div>
   );
-};
-
-const thStyle = {
-  padding: "0.8rem",
-  textAlign: "left",
-  borderBottom: "1px solid #ccc",
-};
-
-const tdStyle = {
-  padding: "0.6rem",
 };
 
 export default AdminPanel;

@@ -11,13 +11,13 @@ const DishCard = ({ dish }) => {
 
   const handleOrder = async () => {
     if (!user) {
-      setToast({ message: "Пожалуйста, войдите в аккаунт", type: "error" });
+      setToast({ message: "Please log in to your account", type: "error" });
       setTimeout(() => setToast(null), 3000);
       return;
     }
 
     if (user.role !== "Customer") {
-      setToast({ message: "Только покупатели могут оформлять заказы", type: "error" });
+      setToast({ message: "Only books sun place warrants", type: "error" });
       setTimeout(() => setToast(null), 3000);
       return;
     }
@@ -25,7 +25,7 @@ const DishCard = ({ dish }) => {
     const order = {
       userId: user.id,
       items: [dish],
-      status: "in progress",
+      status: "In progress",
     };
 
     try {
@@ -39,13 +39,13 @@ const DishCard = ({ dish }) => {
 
       if (!res.ok) throw new Error("Ошибка при создании заказа");
 
-      setToast({ message: "Заказ успешно оформлен!", type: "success" });
+      setToast({ message: "Order successfully placed!", type: "success" });
       setTimeout(() => {
         setToast(null);
         navigate("/orders");
       }, 1500);
     } catch (err) {
-      setToast({ message: "Ошибка при заказе", type: "error" });
+      setToast({ message: "Error while ordering", type: "error" });
       setTimeout(() => setToast(null), 3000);
     }
   };
@@ -62,7 +62,7 @@ const DishCard = ({ dish }) => {
       }}
     >
       <h4 style={{ marginBottom: "0.5rem" }}>{dish.name}</h4>
-      <p style={{ fontSize: "14px", color: "#555" }}>Цена: ${dish.price}</p>
+      <p style={{ fontSize: "14px", color: "#555" }}>Price: {dish.price} ₸</p>
 
       {user?.role === "Customer" && (
         <button
@@ -77,7 +77,7 @@ const DishCard = ({ dish }) => {
             marginTop: "0.5rem",
           }}
         >
-          Оформить заказ
+          Place an order
         </button>
       )}
 

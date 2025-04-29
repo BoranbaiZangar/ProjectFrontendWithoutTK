@@ -20,6 +20,13 @@
       "email": "customer@example.com",
       "password": "customer123",
       "role": "Customer"
+    },
+    {
+      "id": "63d9",
+      "name": "Zharaskhan",
+      "email": "m_jasik_2005@mail.ru",
+      "password": "5bcc6f5c1862b40bc289fabe2e2edd62",
+      "role": "Customer"
     }
   ],
   "restaurants": [

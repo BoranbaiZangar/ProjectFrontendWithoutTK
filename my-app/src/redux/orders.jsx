@@ -1,18 +1,14 @@
 // src/redux/orders.js
 
-// 📌 Action Types
 const FETCH_ORDERS_REQUEST = "orders/FETCH_ORDERS_REQUEST";
 const FETCH_ORDERS_SUCCESS = "orders/FETCH_ORDERS_SUCCESS";
 const FETCH_ORDERS_FAILURE = "orders/FETCH_ORDERS_FAILURE";
 
-// 🛒 Initial State
 const initialState = {
   list: [],
   loading: false,
   error: null,
 };
-
-// 📦 Reducer
 export default function ordersReducer(state = initialState, action) {
   switch (action.type) {
     case FETCH_ORDERS_REQUEST:
@@ -26,7 +22,6 @@ export default function ordersReducer(state = initialState, action) {
   }
 }
 
-// 🧠 Thunk Action для загрузки заказов
 export const fetchOrders = (userId) => async (dispatch) => {
   dispatch({ type: FETCH_ORDERS_REQUEST });
 
@@ -44,7 +39,6 @@ export const fetchOrders = (userId) => async (dispatch) => {
     dispatch({ type: FETCH_ORDERS_FAILURE, payload: err.message });
   }
 };
-// ✅ ДОБАВЬ внизу файла redux/orders.js
 
 export const updateOrderStatus = (orderId, newStatus) => async (dispatch) => {
   try {
@@ -59,9 +53,27 @@ export const updateOrderStatus = (orderId, newStatus) => async (dispatch) => {
       body: JSON.stringify(updatedOrder),
     });
 
-    dispatch(fetchOrders("ALL")); // перезагружаем список заказов
+    dispatch(fetchOrders("ALL"));
   } catch (err) {
     console.error("Ошибка при обновлении статуса:", err);
   }
 };
 
+export const cancelOrder = (orderId) => async (dispatch) => {
+  try {
+    const res = await fetch(`http://localhost:5000/orders/${orderId}`);
+    const order = await res.json();
+
+    const updatedOrder = { ...order, status: "Cancelled" };
+
+    await fetch(`http://localhost:5000/orders/${orderId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedOrder),
+    });
+
+    dispatch(fetchOrders("ALL"));
+  } catch (error) {
+    console.error("Ошибка при отмене заказа", error);
+  }
+};

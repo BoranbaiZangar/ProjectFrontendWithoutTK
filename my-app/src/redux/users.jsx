@@ -1,6 +1,5 @@
 const API_URL = "http://localhost:5000/users";
 
-// ✅ Регистрация
 export const registerUser = async (data) => {
   const res = await fetch(API_URL, {
     method: "POST",
@@ -15,7 +14,6 @@ export const registerUser = async (data) => {
   return await res.json();
 };
 
-// ✅ Авторизация (логин)
 export const loginUser = async (data) => {
   const res = await fetch(`${API_URL}?email=${data.email}`);
   const users = await res.json();
@@ -32,7 +30,6 @@ export const loginUser = async (data) => {
   return { user, token };
 };
 
-// ✅ Выход
 export const logoutUser = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");

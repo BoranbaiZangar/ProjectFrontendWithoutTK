@@ -6,10 +6,10 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => {
       <div style={modalStyle}>
         <p style={{ marginBottom: "1rem" }}>{message}</p>
         <button onClick={onConfirm} style={{ ...btn, background: "#e74c3c" }}>
-          Да
+          Yes
         </button>
         <button onClick={onCancel} style={{ ...btn, marginLeft: "1rem" }}>
-          Отмена
+          Cancel
         </button>
       </div>
     </div>

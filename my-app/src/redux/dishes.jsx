@@ -1,18 +1,15 @@
 // src/redux/dishes.js
 
-// Action Types
 const FETCH_DISHES_REQUEST = "dishes/FETCH_DISHES_REQUEST";
 const FETCH_DISHES_SUCCESS = "dishes/FETCH_DISHES_SUCCESS";
 const FETCH_DISHES_FAILURE = "dishes/FETCH_DISHES_FAILURE";
 
-// Initial State
 const initialState = {
   list: [],
   loading: false,
   error: null,
 };
 
-// Reducer
 export default function dishesReducer(state = initialState, action) {
   switch (action.type) {
     case FETCH_DISHES_REQUEST:
@@ -26,7 +23,6 @@ export default function dishesReducer(state = initialState, action) {
   }
 }
 
-// Thunk Action
 export const fetchDishes = () => async (dispatch) => {
   dispatch({ type: FETCH_DISHES_REQUEST });
 

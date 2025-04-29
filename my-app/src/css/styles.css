@@ -1,0 +1,823 @@
+/* Сброс стандартных стилей */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Базовые стили для body */
+body {
+  font-family: "Times New Roman", Times, serif; /* Основной шрифт для текста */
+  background: #F5F5F5; /* Кремовый фон */
+  color: #1A1A1A; /* Черный текст */
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Контейнер */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #FFFFFF;
+  border-radius: 20px 0 0 20px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  position: relative;
+  transform: rotate(-1deg);
+}
+
+/* Заголовки */
+h1, h2, h3 {
+  font-family: "Georgia", serif; /* Элегантный шрифт для заголовков */
+  font-weight: 700;
+  color: #3E2A1D; /* Темный шоколад */
+  margin-bottom: 1.2rem;
+}
+
+h1 {
+  font-size: 2.2rem;
+  transform: skew(-5deg);
+}
+
+h2 {
+  font-size: 1.7rem;
+}
+
+h3 {
+  font-size: 1.3rem;
+}
+
+/* Ссылки */
+a {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.2rem;
+  color: #6B1E3A; /* Бордовый */
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: #C0A062; /* Золотой */
+  bottom: -4px;
+  left: 0;
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+a:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+a:hover {
+  color: #C0A062; /* Золотой */
+}
+
+/* Кнопки */
+button {
+  font-family: "Georgia", serif; /* Элегантный шрифт для кнопок */
+  background: #6B1E3A; /* Бордовый */
+  color: #FFFFFF;
+  padding: 12px 25px 12px 15px;
+  border: none;
+  border-radius: 10px 5px 10px 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+/* Блюр эффектін алып тастаймыз */
+button::before {
+  display: none; /* Блюр эффектін өшіреміз */
+}
+
+button:hover {
+  background: #C0A062; /* Золотой */
+  transform: scale(1.05);
+}
+
+button:disabled {
+  background: #D3D3D3;
+  cursor: not-allowed;
+}
+
+/* Формы */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #FFFFFF;
+  padding: 30px;
+  border-radius: 15px 0 15px 0;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+input, textarea, select {
+  font-family: "Times New Roman", Times, serif;
+  padding: 12px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px 8px 0 0;
+  font-size: 1rem;
+  background: #FFFFFF;
+  width: 100%;
+  color: #1A1A1A;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+  appearance: none; /* Браузердің стандартты стилін алып тастаймыз */
+  cursor: pointer; /* Курсорды көрсетеміз */
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #C0A062; /* Золотой */
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.input-wrapper label {
+  font-family: "Times New Roman", Times, serif;
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #3E2A1D;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+input:focus + label,
+input:not(:placeholder-shown) + label,
+textarea:focus + label,
+textarea:not(:placeholder-shown) + label {
+  top: 0;
+  font-size: 0.8rem;
+  color: #C0A062;
+}
+
+/* Таблицы */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #FFFFFF;
+  border-radius: 15px 0 15px 0;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-family: "Times New Roman", Times, serif;
+}
+
+th {
+  background: #F5F5F5;
+  color: #3E2A1D;
+  font-weight: 600;
+  transform: skew(-5deg);
+}
+
+td {
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+/* Блюр эффектін алып тастаймыз */
+td::before {
+  display: none; /* Блюр эффектін өшіреміз */
+}
+
+tr:hover td {
+  background: rgba(192, 160, 98, 0.1); /* Жеңіл фон қосамыз */
+}
+
+/* Сообщения об ошибках */
+p[style*="color: red"] {
+  color: #6B1E3A; /* Бордовый */
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(107, 30, 58, 0.1);
+  font-family: "Times New Roman", Times, serif;
+}
+
+/* Admin Panel */
+.admin-panel {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #FFFFFF;
+  border-radius: 20px 0 20px 0;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  transform: rotate(-1deg);
+}
+
+.admin-panel h2 {
+  font-family: "Georgia", serif;
+  font-size: 1.7rem;
+  color: #3E2A1D;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.no-users {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.2rem;
+  color: #1A1A1A;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #FFFFFF;
+  border-radius: 15px 0 15px 0;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-family: "Times New Roman", Times, serif;
+}
+
+.admin-table th {
+  background: #F5F5F5;
+  color: #3E2A1D;
+  font-weight: 600;
+  transform: skew(-5deg);
+}
+
+.admin-table td {
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.role-select {
+  font-family: "Times New Roman", Times, serif;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px 8px 0 0;
+  font-size: 1rem;
+  background: #FFFFFF;
+  color: #1A1A1A;
+  width: 100%;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+  appearance: none; /* Браузердің стандартты стилін алып тастаймыз */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%233E2A1D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); /* Кастомды жебе қосамыз */
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.role-select:focus {
+  border-color: #C0A062; /* Золотой */
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.delete-button {
+  font-family: "Georgia", serif;
+  background: #6B1E3A; /* Бордовый */
+  color: #FFFFFF;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px 5px 10px 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.delete-button:hover {
+  background: #C0A062; /* Золотой */
+  transform: scale(1.05);
+}
+
+/* Каталог ресторанов с горизонтальной прокруткой */
+.restaurants-catalog {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 20px 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+/* Скрываем стандартный скроллбар, но оставляем прокрутку */
+.restaurants-catalog::-webkit-scrollbar {
+  height: 8px;
+}
+
+.restaurants-catalog::-webkit-scrollbar-thumb {
+  background: #6B1E3A;
+  border-radius: 4px;
+}
+
+.restaurants-catalog::-webkit-scrollbar-track {
+  background: #F5F5F5;
+}
+
+/* Карточка ресторана */
+.restaurant-card {
+  flex: 0 0 280px;
+  background: #FFFFFF;
+  border-radius: 15px 15px 5px 5px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  scroll-snap-align: start;
+  text-decoration: none;
+  position: relative;
+  transform: rotate(2deg);
+  margin-left: -40px;
+}
+
+.restaurant-card:first-child {
+  margin-left: 0;
+}
+
+.restaurant-card:hover {
+  transform: rotate(0deg) translateY(-10px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Контент внутри карточки */
+.restaurant-content {
+  padding: 20px;
+}
+
+.restaurant-content h3 {
+  font-family: "Georgia", serif;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #3E2A1D;
+}
+
+.restaurant-content p {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 0.9rem;
+  color: #1A1A1A;
+  opacity: 0.7;
+}
+
+/* Restaurant Detail Page */
+.restaurant-detail {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #FFFFFF;
+  border-radius: 20px 0 20px 0;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  transform: rotate(-1deg);
+}
+
+.restaurant-title {
+  font-family: "Georgia", serif;
+  font-size: 2.5rem;
+  color: #3E2A1D;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.restaurant-description {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.1rem;
+  color: #1A1A1A;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.owner-info {
+  background: #F5F5F5;
+  padding: 20px;
+  border-radius: 10px 0 10px 0;
+  margin-bottom: 2rem;
+}
+
+.owner-info h3 {
+  font-family: "Georgia", serif;
+  font-size: 1.3rem;
+  color: #6B1E3A;
+  margin-bottom: 0.5rem;
+}
+
+.owner-name {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+  color: #3E2A1D;
+}
+
+.owner-contact {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 0.9rem;
+  color: #1A1A1A;
+  opacity: 0.7;
+}
+
+.rating-info {
+  margin-bottom: 2rem;
+}
+
+.rating-info h3 {
+  font-family: "Georgia", serif;
+  font-size: 1.3rem;
+  color: #C0A062;
+  margin-bottom: 0.5rem;
+}
+
+.rating-info p {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 0.95rem;
+  color: #1A1A1A;
+  font-style: italic;
+}
+
+.menu-title {
+  font-family: "Georgia", serif;
+  font-size: 1.8rem;
+  color: #C0A062;
+  margin-bottom: 1rem;
+}
+
+.dishes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.no-dishes {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1rem;
+  color: #1A1A1A;
+  opacity: 0.7;
+  text-align: center;
+}
+
+.loading {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.2rem;
+  color: #6B1E3A;
+  text-align: center;
+}
+
+.error {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.2rem;
+  color: #6B1E3A;
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(107, 30, 58, 0.1);
+}
+
+.not-found {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.2rem;
+  color: #1A1A1A;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* Навбар */
+.navbar {
+  padding: 1.5rem;
+  background: #FFFFFF;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 40px auto 1rem auto;
+  transform: rotate(-3deg);
+  position: relative;
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 95% 100%, 5% 100%, 0 80%);
+  background: linear-gradient(135deg, #FFFFFF 70%, #F5F5F5 100%);
+}
+
+.navbar-logo {
+  font-family: "Georgia", serif;
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #C0A062; /* Золотой */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.navbar-logo:hover {
+  color: #6B1E3A; /* Бордовый */
+}
+
+.navbar-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+.navbar-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.navbar-link {
+  font-family: "Georgia", serif;
+  color: #6B1E3A; /* Бордовый */
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: #C0A062; /* Золотой */
+  transform: translateX(10px);
+}
+
+.navbar-button {
+  font-family: "Georgia", serif;
+  background: #6B1E3A; /* Бордовый */
+  color: #FFFFFF;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px 4px 8px 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.navbar-button:hover {
+  background: #C0A062; /* Золотой */
+  transform: translateX(10px);
+}
+
+.navbar-user {
+  font-family: "Times New Roman", Times, serif;
+  color: #3E2A1D; /* Темный шоколад */
+  font-size: 1rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  table,
+  th,
+  td {
+    font-size: 0.9rem;
+  }
+
+  .restaurant-card {
+    flex: 0 0 250px;
+  }
+
+  .navbar {
+    transform: rotate(0deg);
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem;
+    margin: 20px auto 1rem auto;
+    clip-path: none;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .navbar-auth {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .navbar-logo {
+    font-size: 1.2rem;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .role-select {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+
+  .delete-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Стили для уведомления */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 5px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-in-out, slideOut 0.3s ease-in-out 2.7s forwards;
+  z-index: 1000;
+}
+
+.notification.success {
+  background-color: #4caf50;
+}
+
+.notification.error {
+  background-color: #d81b60;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Анимация появления и исчезновения */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+/* 1) Navbar flex container */
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 0.0rem 1rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* 2) Logo stays on the left */
+.navbar-logo {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #3e2a1d;
+  text-decoration: none;
+}
+
+/* 3) Push actions to the right */
+.navbar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 1rem;
+}
+
+/* 4) Keep search right after the logo */
+.navbar-search {
+  margin-left: 2rem; /* увеличили отступ слева */
+  display: flex;
+  align-items: center;
+}
+
+/* 5) The actual search‐bar styling */
+.search-bar {
+  display: flex;
+  border: 0.5px solid #ddd; /* или rgba(0,0,0,0.1) для ещё более лёгкого вида */
+  border-radius: 6px;      /* same as your buttons */
+  overflow: hidden;
+  background: #fff;
+}
+
+/* 6) Input inside it */
+.search-input {
+  border: none;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  height: 2.5rem;          /* match .navbar-btn height */
+  line-height: 1;
+  outline: none;
+}
+
+/* 7) The Find button */
+.search-btn {
+  border: none;
+  background: #3e2a1d;      /* same as Register btn */
+  color: #fff;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  height: 2.5rem;          /* match input height */
+  border-radius: 0 6px 6px 0;
+  transition: border-radius 0.2s;
+}
+
+.search-btn:hover {
+  border-radius: 0;        /* straight edges on hover */
+}
+
+
+
+.navbar-search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-user {
+  margin-right: 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+.navbar-btn {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  color: #3e2a1d;
+}
+
+.navbar-btn--primary {
+  background: #3e2a1d;
+  color: #fff;
+  border-radius: 4px;
+}

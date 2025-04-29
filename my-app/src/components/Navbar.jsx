@@ -1,11 +1,13 @@
-// src/components/Navbar.js
+// src/components/Navbar.jsx
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/auth";
+import SearchBar from "./SearchBar";
+import "../css/styles.css"; 
 
-const Navbar = () => {
-  const { user } = useSelector((state) => state.auth);
+export default function Navbar() {
+  const { user } = useSelector(state => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -14,52 +16,35 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  // Заглушка для onSearch — потом сюда будете подставлять реальную логику
+  const onSearch = query => {
+    console.log('Searching for:', query);
+  };
+
   return (
-    <nav style={{ padding: "1rem", borderBottom: "1px solid #ccc", marginBottom: "1rem" }}>
-      <Link to="/" style={{ marginRight: "1rem", fontWeight: "bold" }}>
-        LAMBORJEIMYN
-      </Link>
+    <nav className="navbar">
+   
+      <Link to="/" className="navbar-logo">Lamborjeimyn</Link>
 
-      <Link to="/restaurants" style={{ marginRight: "1rem" }}>
-        Рестораны
-      </Link>
-
-      {(user?.role === "Customer" || user?.role === "Admin") && (
-  <Link to="/orders" style={{ marginRight: "1rem" }}>
-    Заказы
-  </Link>
-)}
-
-
-      {user?.role === "Owner" && (
-        <Link to="/owner" style={{ marginRight: "1rem" }}>
-          Управление рестораном
-        </Link>
-      )}
-
-      {user?.role === "Admin" && (
-        <Link to="/admin" style={{ marginRight: "1rem" }}>
-          Админ-панель
-        </Link>
-      )}
-
-      <span style={{ float: "right" }}>
+      {/* Вот наш вынесенный компонент */}
+      <SearchBar onSearch={onSearch} />
+ 
+      <div className="navbar-actions">
         {user ? (
           <>
-            <span style={{ marginRight: "1rem" }}>Привет, {user.name}</span>
-            <button onClick={handleLogout}>Выйти</button>
+            <span className="navbar-user">Hello, {user.name}</span>
+            <Link to="/profile" className="navbar-btn">Profile</Link>
+            <button onClick={handleLogout} className="navbar-btn">Logout</button>
           </>
         ) : (
           <>
-            <Link to="/login" style={{ marginRight: "1rem" }}>
-              Войти
+            <Link to="/login" className="navbar-btn">Login</Link>
+            <Link to="/register" className="navbar-btn navbar-btn--primary">
+              Register
             </Link>
-            <Link to="/register">Зарегистрироваться</Link>
           </>
         )}
-      </span>
+      </div>
     </nav>
   );
-};
-
-export default Navbar;
+}
