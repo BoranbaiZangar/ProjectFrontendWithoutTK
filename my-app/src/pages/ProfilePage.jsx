@@ -1,41 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import md5 from "md5";
-import "../css/styles.css";
+import { fetchReviews } from "../redux/orders";
 
 const ProfilePage = () => {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { reviews } = useSelector((state) => state.orders);
   const [profileData, setProfileData] = useState(null);
   const [roleSpecificData, setRoleSpecificData] = useState(null);
   const [orders, setOrders] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
+  const [restaurantOwners, setRestaurantOwners] = useState([]);
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        // Получаем заказы
+        setLoading(true);
         const ordersRes = await fetch("http://localhost:5000/orders");
         const ordersData = await ordersRes.json();
         setOrders(ordersData);
 
-        // Получаем рестораны
         const restaurantsRes = await fetch("http://localhost:5000/restaurants");
         const restaurantsData = await restaurantsRes.json();
         setRestaurants(restaurantsData);
 
-        // Получаем данные профиля (avatar_url, address) из user_profiles для всех ролей
+        const ownersRes = await fetch("http://localhost:5000/restaurant_owners");
+        const ownersData = await ownersRes.json();
+        setRestaurantOwners(ownersData);
+
         const profileRes = await fetch(`http://localhost:5000/user_profiles?user_id=${user.id}`);
         const profileData = await profileRes.json();
         setProfileData(profileData[0] || {});
 
-        // Получаем дополнительные данные в зависимости от роли
         if (user.role === "courier") {
           const courierRes = await fetch(`http://localhost:5000/couriers?user_id=${user.id}`);
           const courierData = await courierRes.json();
           setRoleSpecificData(courierData[0] || {});
+          dispatch(fetchReviews({ courierId: user.id }));
         } else if (user.role === "owner") {
           const ownerRes = await fetch(`http://localhost:5000/restaurant_owners?user_id=${user.id}`);
           const ownerData = await ownerRes.json();
@@ -51,13 +58,16 @@ const ProfilePage = () => {
         }
       } catch (err) {
         console.error("Error fetching profile data:", err);
+        setError("Failed to load profile data. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
     if (user) {
       fetchProfileData();
     }
-  }, [user]);
+  }, [user, dispatch]);
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -89,72 +99,74 @@ const ProfilePage = () => {
   };
 
   if (!user) {
-    return <div className="container">Please log in to view your profile.</div>;
+    return <div style={{ padding: "20px" }}>Please log in to view your profile.</div>;
   }
 
-  // Функции для аналитики
+  if (loading) {
+    return <div style={{ padding: "20px" }}>Loading...</div>;
+  }
+
+  if (error) {
+    return <div style={{ padding: "20px", color: "red" }}>{error}</div>;
+  }
+
+  const calculateTotalPrice = (items) => {
+    return items.reduce((sum, item) => sum + item.price, 0);
+  };
+
   const getOrdersStats = (orders, userId, roleFilter) => {
     const userOrders = orders.filter((order) => {
-      if (roleFilter === "user") return order.user_id === userId;
-      if (roleFilter === "courier") return order.courier_id === userId && order.status === "delivered";
+      if (roleFilter === "user") return order.user_id === userId || order.userId === userId;
+      if (roleFilter === "courier") return order.courier_id === userId && order.status === "Delivered";
       if (roleFilter === "owner") {
-        const userRestaurantIds = restaurants
-          .filter((r) => r.owner_id === userId)
-          .map((r) => r.id);
-        return userRestaurantIds.includes(order.restaurant_id);
+        const userRestaurantIds = restaurantOwners
+          .filter((owner) => owner.user_id === userId && owner.restaurant_id)
+          .map((owner) => owner.restaurant_id);
+        return order.restaurant_id && userRestaurantIds.includes(order.restaurant_id);
       }
       return false;
     });
 
-    const today = new Date("2025-05-01"); // Текущая дата из контекста
-    const dayOrders = userOrders.filter((order) => {
-      const orderDate = new Date(order.created_at);
-      return orderDate.toDateString() === today.toDateString();
-    });
-    const weekOrders = userOrders.filter((order) => {
-      const orderDate = new Date(order.created_at);
-      return (today - orderDate) / (1000 * 60 * 60 * 24) <= 7;
-    });
-    const monthOrders = userOrders.filter((order) => {
-      const orderDate = new Date(order.created_at);
-      return (today - orderDate) / (1000 * 60 * 60 * 24) <= 30;
-    });
-
-    const totalSpent = userOrders.reduce((sum, order) => sum + order.total_price, 0);
+    const totalSpent = userOrders.reduce((sum, order) => sum + calculateTotalPrice(order.items), 0);
     const recentOrders = userOrders.slice(-3).reverse();
 
-    return { dayOrders, weekOrders, monthOrders, totalSpent, recentOrders };
+    return { totalOrders: userOrders, totalSpent, recentOrders };
   };
 
   const getFavoriteRestaurant = (orders, userId) => {
-    const userOrders = orders.filter((order) => order.user_id === userId);
+    const userOrders = orders.filter((order) => (order.user_id === userId || order.userId === userId) && order.restaurant_id);
     const restaurantCounts = userOrders.reduce((acc, order) => {
-      acc[order.restaurant_id] = (acc[order.restaurant_id] || 0) + 1;
+      if (restaurants.find((r) => r.id === order.restaurant_id)) {
+        acc[order.restaurant_id] = (acc[order.restaurant_id] || 0) + 1;
+      }
       return acc;
     }, {});
-    const favoriteId = Object.keys(restaurantCounts).reduce((a, b) =>
-      restaurantCounts[a] > restaurantCounts[b] ? a : b,
+    const favoriteId = Object.keys(restaurantCounts).reduce(
+      (a, b) => (restaurantCounts[a] > restaurantCounts[b] ? a : b),
       null
     );
-    return restaurants.find((r) => r.id === parseInt(favoriteId))?.name || "None";
+    return restaurants.find((r) => r.id === favoriteId)?.name || "None";
   };
 
-  const getAverageOrdersPerDay = (orders, userId, startDate) => {
-    const userOrders = orders.filter((order) => order.courier_id === userId && order.status === "delivered");
-    const start = new Date(startDate);
-    const today = new Date("2025-05-01");
-    const days = (today - start) / (1000 * 60 * 60 * 24) || 1; // Избегаем деления на 0
-    return (userOrders.length / days).toFixed(2);
+  const getAverageOrdersPerDay = (orders, userId) => {
+    const userOrders = orders.filter((order) => order.courier_id === userId && order.status === "Delivered");
+    return userOrders.length; // Возвращаем общее количество доставленных заказов, так как created_at недоступен
   };
 
-  // Рендеринг профиля в зависимости от роли
+  const getCourierAverageRating = () => {
+    const courierReviews = reviews.filter((review) => review.courierId === user.id);
+    return courierReviews.length > 0
+      ? (courierReviews.reduce((sum, review) => sum + review.courierRating, 0) / courierReviews.length).toFixed(1)
+      : 0;
+  };
+
   const renderProfile = () => {
     if (user.role === "user") {
-      const { dayOrders, weekOrders, monthOrders, totalSpent, recentOrders } = getOrdersStats(orders, user.id, "user");
+      const { totalOrders, totalSpent, recentOrders } = getOrdersStats(orders, user.id, "user");
       const favoriteRestaurant = getFavoriteRestaurant(orders, user.id);
 
       return (
-        <div className="profile-section">
+        <div style={{ marginBottom: "20px" }}>
           <h3>User Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
@@ -162,9 +174,7 @@ const ProfilePage = () => {
           <p><strong>Registration Date:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
           <p><strong>Default Address:</strong> {profileData?.address || "Not set"}</p>
           <h4>Order Statistics</h4>
-          <p><strong>Orders Today:</strong> {dayOrders.length}</p>
-          <p><strong>Orders This Week:</strong> {weekOrders.length}</p>
-          <p><strong>Orders This Month:</strong> {monthOrders.length}</p>
+          <p><strong>Total Orders:</strong> {totalOrders.length}</p>
           <p><strong>Total Spent:</strong> {totalSpent} KZT</p>
           <p><strong>Favorite Restaurant:</strong> {favoriteRestaurant}</p>
           <h4>Last 3 Orders</h4>
@@ -172,62 +182,66 @@ const ProfilePage = () => {
             <ul>
               {recentOrders.map((order) => (
                 <li key={order.id}>
-                  Order #{order.id} on {new Date(order.created_at).toLocaleDateString()} - Status: {order.status}
+                  Order #{order.id} - Restaurant ID: {order.restaurant_id || "Unknown"} - Status: {order.status} - Total: {calculateTotalPrice(order.items)} KZT
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No recent orders.</p>
+            <p>No orders found.</p>
           )}
         </div>
       );
     }
 
     if (user.role === "courier") {
-      const { dayOrders, weekOrders, monthOrders, recentOrders } = getOrdersStats(orders, user.id, "courier");
-      const avgOrdersPerDay = getAverageOrdersPerDay(orders, user.id, user.created_at);
+      const { totalOrders, recentOrders } = getOrdersStats(orders, user.id, "courier");
+      const totalDeliveries = getAverageOrdersPerDay(orders, user.id);
+      const averageRating = getCourierAverageRating();
 
       return (
-        <div className="profile-section">
+        <div style={{ marginBottom: "20px" }}>
           <h3>Courier Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Phone:</strong> {user.phone}</p>
           <p><strong>Vehicle Type:</strong> {roleSpecificData?.vehicle_type || "Not set"}</p>
           <p><strong>Start Date:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
           <p><strong>Availability:</strong> {roleSpecificData?.is_available ? "Available" : "Not Available"}</p>
+          <p><strong>Average Rating:</strong> {averageRating} / 5</p>
           <h4>Delivery Statistics</h4>
-          <p><strong>Deliveries Today:</strong> {dayOrders.length}</p>
-          <p><strong>Deliveries This Week:</strong> {weekOrders.length}</p>
-          <p><strong>Deliveries This Month:</strong> {monthOrders.length}</p>
-          <p><strong>Average Deliveries Per Day:</strong> {avgOrdersPerDay}</p>
+          <p><strong>Total Deliveries:</strong> {totalDeliveries}</p>
           <h4>Last 3 Deliveries</h4>
           {recentOrders.length > 0 ? (
             <ul>
               {recentOrders.map((order) => (
                 <li key={order.id}>
-                  Order #{order.id} - Total: {order.total_price} KZT
+                  Order #{order.id} - Restaurant ID: {order.restaurant_id || "Unknown"} - Total: {calculateTotalPrice(order.items)} KZT
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No recent deliveries.</p>
+            <p>No deliveries found.</p>
           )}
         </div>
       );
     }
 
     if (user.role === "owner") {
-      const { dayOrders, weekOrders, monthOrders, totalSpent, recentOrders } = getOrdersStats(orders, user.id, "owner");
-      const userRestaurants = restaurants.filter((r) => r.owner_id === user.id);
-      const popularDishes = userRestaurants.flatMap((r) =>
-        r.dishes.map((dish) => ({
-          name: dish.name,
-          count: orders.filter((o) => o.restaurant_id === r.id && o.items.some((item) => item.id === dish.id)).length,
-        }))
-      ).sort((a, b) => b.count - a.count).slice(0, 3);
+      const { totalOrders, totalSpent, recentOrders } = getOrdersStats(orders, user.id, "owner");
+      const userRestaurants = restaurants.filter((r) =>
+        restaurantOwners.some((owner) => owner.user_id === user.id && owner.restaurant_id === r.id)
+      );
+      const popularDishes = userRestaurants
+        .flatMap((r) =>
+          r.dishes.map((dish) => ({
+            name: dish.name,
+            count: orders.filter((o) => o.restaurant_id === r.id && o.items.some((item) => item.id === dish.id)).length,
+          }))
+        )
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
 
       return (
-        <div className="profile-section">
+        <div style={{ marginBottom: "20px" }}>
           <h3>Restaurant Owner Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
@@ -245,9 +259,7 @@ const ProfilePage = () => {
             <p>No restaurants found.</p>
           )}
           <h4>Restaurant Statistics</h4>
-          <p><strong>Orders Today:</strong> {dayOrders.length}</p>
-          <p><strong>Orders This Week:</strong> {weekOrders.length}</p>
-          <p><strong>Orders This Month:</strong> {monthOrders.length}</p>
+          <p><strong>Total Orders:</strong> {totalOrders.length}</p>
           <p><strong>Total Revenue:</strong> {totalSpent} KZT</p>
           <h4>Popular Dishes</h4>
           <p><strong>Default Address:</strong> {profileData?.address || "Not set"}</p>
@@ -267,12 +279,12 @@ const ProfilePage = () => {
             <ul>
               {recentOrders.map((order) => (
                 <li key={order.id}>
-                  Order #{order.id} on {new Date(order.created_at).toLocaleDateString()} - Total: {order.total_price} KZT
+                  Order #{order.id} - Restaurant ID: {order.restaurant_id} - Total: {calculateTotalPrice(order.items)} KZT
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No recent orders.</p>
+            <p>No orders found.</p>
           )}
         </div>
       );
@@ -280,7 +292,7 @@ const ProfilePage = () => {
 
     if (user.role === "moderator") {
       return (
-        <div className="profile-section">
+        <div style={{ marginBottom: "20px" }}>
           <h3>Moderator Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
@@ -293,17 +305,11 @@ const ProfilePage = () => {
     }
 
     if (user.role === "admin") {
-      const activeUsersToday = [...new Set(orders.filter((order) => {
-        const orderDate = new Date(order.created_at);
-        return orderDate.toDateString() === new Date("2025-05-01").toDateString();
-      }).map((order) => order.user_id))].length;
-      const ordersToday = orders.filter((order) => {
-        const orderDate = new Date(order.created_at);
-        return orderDate.toDateString() === new Date("2025-05-01").toDateString();
-      }).length;
+      const activeUsersToday = [...new Set(orders.map((order) => order.user_id || order.userId))].length;
+      const ordersToday = orders.length;
 
       return (
-        <div className="profile-section">
+        <div style={{ marginBottom: "20px" }}>
           <h3>Admin Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
@@ -311,8 +317,8 @@ const ProfilePage = () => {
           <p><strong>Admin Since:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
           <p><strong>Users Blocked:</strong> 3 (Placeholder)</p>
           <p><strong>Restaurants Approved/Banned:</strong> 10 / 1 (Placeholder)</p>
-          <p><strong>Active Users Today:</strong> {activeUsersToday}</p>
-          <p><strong>Orders on Platform Today:</strong> {ordersToday}</p>
+          <p><strong>Active Users:</strong> {activeUsersToday}</p>
+          <p><strong>Total Orders on Platform:</strong> {ordersToday}</p>
           <p><strong>Last Actions:</strong> Banned user #42 on {new Date().toLocaleDateString()} (Placeholder)</p>
         </div>
       );
@@ -322,12 +328,12 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="container profile-container">
-      <div className="profile-header">
+    <div style={{ padding: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
         <img
           src={profileData?.avatar_url || "https://via.placeholder.com/100"}
           alt="Profile"
-          className="profile-avatar"
+          style={{ width: "100px", height: "100px", borderRadius: "50%", marginRight: "20px" }}
         />
         <div>
           <h2>{user.name}'s Profile</h2>
@@ -337,10 +343,10 @@ const ProfilePage = () => {
 
       {renderProfile()}
 
-      <div className="profile-section">
+      <div>
         <h3>Account Settings</h3>
-        <button className="edit-profile-btn">Edit Profile</button>
-        <form onSubmit={handlePasswordChange} className="password-form">
+        <button style={{ padding: "5px 10px", marginBottom: "10px" }}>Edit Profile</button>
+        <form onSubmit={handlePasswordChange}>
           <h4>Change Password</h4>
           <input
             type="password"
@@ -348,10 +354,11 @@ const ProfilePage = () => {
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="New Password (min 8 characters)"
             required
+            style={{ padding: "5px", marginBottom: "10px", width: "200px" }}
           />
-          {passwordError && <p className="error-text">{passwordError}</p>}
-          {passwordSuccess && <p className="success-text">{passwordSuccess}</p>}
-          <button type="submit">Update Password</button>
+          {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
+          {passwordSuccess && <p style={{ color: "green" }}>{passwordSuccess}</p>}
+          <button type="submit" style={{ padding: "5px 10px" }}>Update Password</button>
         </form>
       </div>
     </div>

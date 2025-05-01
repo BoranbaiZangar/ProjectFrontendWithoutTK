@@ -7,6 +7,7 @@ import {
   fetchOwnerById,
   clearOwner,
 } from "../redux/restaurants";
+import { fetchReviews } from "../redux/orders";
 import DishCard from "../components/DishCard";
 
 const RestaurantDetail = () => {
@@ -15,6 +16,9 @@ const RestaurantDetail = () => {
 
   const { selected: restaurant, owner, loading, error } = useSelector(
     (state) => state.restaurants
+  );
+  const { reviews, loading: reviewsLoading, error: reviewsError } = useSelector(
+    (state) => state.orders
   );
   const { user } = useSelector((state) => state.auth);
 
@@ -28,6 +32,7 @@ const RestaurantDetail = () => {
     }
 
     dispatch(fetchRestaurantById(id));
+    dispatch(fetchReviews({ restaurantId: id }));
 
     return () => {
       dispatch(clearSelectedRestaurant());
@@ -41,11 +46,11 @@ const RestaurantDetail = () => {
     }
   }, [dispatch, restaurant]);
 
-  if (loading) return <p className="loading">Loading restaurant...</p>;
+  if (loading || reviewsLoading) return <p>Loading...</p>;
 
   if (error) {
     return (
-      <p className="error">
+      <p style={{ color: "red" }}>
         {error === "Failed to fetch restaurant"
           ? "Could not load the restaurant. It may not exist or the server is unavailable."
           : error === "Invalid restaurant ID"
@@ -55,10 +60,14 @@ const RestaurantDetail = () => {
     );
   }
 
-  if (!restaurant) return <p className="not-found">Restaurant not found</p>;
+  if (reviewsError) {
+    return <p style={{ color: "red" }}>Error loading reviews: {reviewsError}</p>;
+  }
+
+  if (!restaurant) return <p>Restaurant not found</p>;
 
   const isOwner = user?.id && restaurant.owner_id === user.id;
-  const userRole = user?.role || "guest"; // Если user или role отсутствует, считаем "guest"
+  const userRole = user?.role || "guest";
   const canViewRestaurant =
     userRole === "admin" ||
     userRole === "moderator" ||
@@ -66,19 +75,24 @@ const RestaurantDetail = () => {
     restaurant.status === "active";
 
   if (!canViewRestaurant) {
-    return <p className="not-found">You do not have permission to view this restaurant.</p>;
+    return <p>You do not have permission to view this restaurant.</p>;
   }
 
-  return (
-    <div className="restaurant-detail container">
-      <h1 className="restaurant-title">{restaurant.name}</h1>
+  const averageRating =
+    reviews.length > 0
+      ? (reviews.reduce((sum, review) => sum + review.restaurantRating, 0) / reviews.length).toFixed(1)
+      : 0;
 
-      <div className="restaurant-description">
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>{restaurant.name}</h1>
+
+      <div>
         <h3>Description:</h3>
         <p>{restaurant.description}</p>
         {owner ? (
           <p>
-            Managed by <span className="owner-name">{owner.name}</span> – a
+            Managed by <span style={{ fontWeight: "bold" }}>{owner.name}</span> – a
             passionate food enthusiast dedicated to bringing you the best dining
             experience.
           </p>
@@ -87,29 +101,49 @@ const RestaurantDetail = () => {
         )}
       </div>
 
-      <div className="rating-info">
+      <div>
         <h3>Rating</h3>
         <p>
-          Coming soon! In our next update, you'll be able to rate this
-          restaurant with a star system. Stay tuned!
+          Average Rating: {averageRating} / 5 ({reviews.length} reviews)
         </p>
+        <h4>Reviews</h4>
+        {reviews.length > 0 ? (
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {reviews.map((review) => (
+              <li
+                key={review.id}
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "10px",
+                  marginBottom: "10px",
+                  borderRadius: "4px",
+                }}
+              >
+                <p>Rating: {review.restaurantRating} / 5</p>
+                <p>Comment: {review.restaurantComment}</p>
+                <p>Posted on: {new Date(review.createdAt).toLocaleString()}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No reviews yet.</p>
+        )}
       </div>
 
-      <h2 className="menu-title">Menu</h2>
+      <h2>Menu</h2>
       {restaurant.dishes && restaurant.dishes.length > 0 ? (
-        <div className="dishes-list">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
           {restaurant.dishes.map((dish) => (
-            <DishCard key={dish.id} dish={dish} />
-          ))}
+            <DishCard key={dish.id} dish={dish} restaurantId={restaurant.id} />          ))}
         </div>
       ) : (
-        <p className="no-dishes">No dishes available yet in this restaurant.</p>
+        <p>No dishes available yet in this restaurant.</p>
       )}
 
       {owner ? (
-        <p className="owner-contact">Contact: {owner.email}</p>
+        <p>Contact: {owner.email}</p>
       ) : (
-        <p className="owner-contact">Contact: Loading...</p>
+        <p>Contact: Loading...</p>
       )}
     </div>
   );

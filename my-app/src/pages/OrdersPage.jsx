@@ -6,28 +6,26 @@ import {
   cancelOrder,
   assignCourier,
   submitReview,
+  fetchReviews,
 } from "../redux/orders";
 import { fetchCouriers } from "../redux/couriers";
 
 const OrdersPage = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { list: orders = [], loading: ordersLoading, error: ordersError } =
+  const { list: orders = [], reviews = [], loading: ordersLoading, error: ordersError } =
     useSelector((state) => state.orders || {});
   const { list: couriers = [], loading: couriersLoading, error: couriersError } =
     useSelector((state) => state.couriers || {});
-
-  const [reviewData, setReviewData] = useState({
-    courierRating: 0,
-    restaurantRating: 0,
-    restaurantComment: "",
-  });
+  const [reviewData, setReviewData] = useState({});
+  const [showReviewForm, setShowReviewForm] = useState({});
 
   useEffect(() => {
     if (user) {
       const target = user.role === "admin" || user.role === "moderator" ? "ALL" : user.id;
       dispatch(fetchOrders(target));
       dispatch(fetchCouriers());
+      dispatch(fetchReviews({}));
     }
   }, [dispatch, user]);
 
@@ -52,10 +50,19 @@ const OrdersPage = () => {
   };
 
   const handleSubmitReview = (orderId, order) => {
-    if (reviewData.courierRating < 1 || reviewData.courierRating > 5 || reviewData.restaurantRating < 1 || reviewData.restaurantRating > 5) {
+    const data = reviewData[orderId];
+    if (!data || data.courierRating < 1 || data.courierRating > 5 || data.restaurantRating < 1 || data.restaurantRating > 5) {
       dispatch({
         type: "toast/ADD_TOAST",
         payload: { message: "Ratings must be between 1 and 5.", type: "error" },
+      });
+      return;
+    }
+
+    if (!order.restaurant_id) {
+      dispatch({
+        type: "toast/ADD_TOAST",
+        payload: { message: "Cannot submit review: Restaurant ID is missing for this order.", type: "error" },
       });
       return;
     }
@@ -66,13 +73,23 @@ const OrdersPage = () => {
         userId: user.id,
         courierId: order.courier_id,
         restaurantId: order.restaurant_id,
-        courierRating: reviewData.courierRating,
-        restaurantRating: reviewData.restaurantRating,
-        restaurantComment: reviewData.restaurantComment,
+        courierRating: data.courierRating,
+        restaurantRating: data.restaurantRating,
+        restaurantComment: data.restaurantComment,
       })
-    );
-    setReviewData({ courierRating: 0, restaurantRating: 0, restaurantComment: "" });
-    dispatch(fetchOrders(user.id)); // Refresh orders after submitting review
+    ).then(() => {
+      setShowReviewForm((prev) => ({ ...prev, [orderId]: false }));
+      setReviewData((prev) => ({ ...prev, [orderId]: { courierRating: 0, restaurantRating: 0, restaurantComment: "" } }));
+      dispatch(fetchReviews({}));
+    });
+  };
+
+  const hasReview = (orderId) => {
+    return reviews.some((review) => review.orderId === orderId && review.userId === user.id);
+  };
+
+  const getReviewForOrder = (orderId) => {
+    return reviews.find((review) => review.orderId === orderId && review.userId === user.id);
   };
 
   const statusColors = {
@@ -93,30 +110,15 @@ const OrdersPage = () => {
     : [];
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h2>Orders</h2>
       {ordersLoading && <p>Loading orders...</p>}
-      {ordersError && (
-        <p style={{ color: "red" }}>
-          {typeof ordersError === "string" ? ordersError : JSON.stringify(ordersError)}
-        </p>
-      )}
+      {ordersError && <p style={{ color: "red" }}>{ordersError}</p>}
       {couriersLoading && <p>Loading couriers...</p>}
       {couriersError && <p style={{ color: "red" }}>Error loading couriers: {couriersError}</p>}
       {!user && <p>Please log in to view orders.</p>}
 
-      {user && (
-        <div>
-          <p>Debug: User Role: {user.role}</p>
-          <p>Debug: User ID: {user.id}</p>
-          <p>Debug: Loaded orders count: {orders.length}</p>
-          <p>Debug: Filtered orders count: {filteredOrders.length}</p>
-        </div>
-      )}
-
-      {filteredOrders.length === 0 && !ordersLoading && !ordersError && (
-        <p>No orders found.</p>
-      )}
+      {filteredOrders.length === 0 && !ordersLoading && !ordersError && <p>No orders found.</p>}
 
       {filteredOrders.map((order) => (
         <div
@@ -139,10 +141,11 @@ const OrdersPage = () => {
             Status: {order.status}
           </p>
           <p>Courier ID: {order.courier_id || "Not assigned"}</p>
+          <p>Restaurant ID: {order.restaurant_id || "Not specified"}</p>
 
           {user?.role === "moderator" && order.status === "In progress" && (
             <div>
-              <label htmlFor={`courier-select-${order.id}`}>Assign Courier:</label>
+              <label htmlFor={`courier-select-${order.id}`}>Assign Courier: </label>
               <select
                 id={`courier-select-${order.id}`}
                 onChange={(e) => handleAssignCourier(order.id, e.target.value)}
@@ -163,12 +166,18 @@ const OrdersPage = () => {
           {user?.role === "courier" && order.courier_id === user.id && (
             <div>
               {order.status === "Processing" && (
-                <button onClick={() => handleConfirmOrder(order.id)}>
+                <button
+                  onClick={() => handleConfirmOrder(order.id)}
+                  style={{ marginRight: "10px", padding: "5px 10px" }}
+                >
                   Confirm Pickup
                 </button>
               )}
               {order.status === "In Transit" && (
-                <button onClick={() => handleConfirmDelivery(order.id)}>
+                <button
+                  onClick={() => handleConfirmDelivery(order.id)}
+                  style={{ padding: "5px 10px" }}
+                >
                   Confirm Delivered
                 </button>
               )}
@@ -177,54 +186,105 @@ const OrdersPage = () => {
 
           {user?.role === "user" &&
             (order.status === "Pending" || order.status === "In progress") && (
-              <button onClick={() => handleCancelOrder(order.id)}>Cancel Order</button>
+              <button
+                onClick={() => handleCancelOrder(order.id)}
+                style={{ padding: "5px 10px", background: "#e74c3c", color: "white", border: "none" }}
+              >
+                Cancel Order
+              </button>
             )}
 
-          {user?.role === "user" && order.status === "Delivered" && (
+          {user?.role === "user" && order.status === "Delivered" && order.restaurant_id && (
             <div>
-              <h4>Leave a Review</h4>
-              <div>
-                <label>Courier Rating (1-5): </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={reviewData.courierRating}
-                  onChange={(e) =>
-                    setReviewData({
-                      ...reviewData,
-                      courierRating: parseInt(e.target.value, 10) || 0,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label>Restaurant Rating (1-5): </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={reviewData.restaurantRating}
-                  onChange={(e) =>
-                    setReviewData({
-                      ...reviewData,
-                      restaurantRating: parseInt(e.target.value, 10) || 0,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label>Restaurant Comment: </label>
-                <textarea
-                  value={reviewData.restaurantComment}
-                  onChange={(e) =>
-                    setReviewData({ ...reviewData, restaurantComment: e.target.value })
-                  }
-                />
-              </div>
-              <button onClick={() => handleSubmitReview(order.id, order)}>
-                Submit Review
-              </button>
+              {hasReview(order.id) ? (
+                <div>
+                  <h4>Your Review</h4>
+                  <p>Courier Rating: {getReviewForOrder(order.id).courierRating} / 5</p>
+                  <p>Restaurant Rating: {getReviewForOrder(order.id).restaurantRating} / 5</p>
+                  <p>Comment: {getReviewForOrder(order.id).restaurantComment}</p>
+                </div>
+              ) : (
+                <div>
+                  {showReviewForm[order.id] ? (
+                    <div>
+                      <h4>Leave a Review</h4>
+                      <div>
+                        <label>Courier Rating (1-5): </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="5"
+                          value={reviewData[order.id]?.courierRating || 0}
+                          onChange={(e) =>
+                            setReviewData({
+                              ...reviewData,
+                              [order.id]: {
+                                ...reviewData[order.id],
+                                courierRating: parseInt(e.target.value, 10) || 0,
+                              },
+                            })
+                          }
+                          style={{ width: "60px", marginBottom: "10px" }}
+                        />
+                      </div>
+                      <div>
+                        <label>Restaurant Rating (1-5): </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="5"
+                          value={reviewData[order.id]?.restaurantRating || 0}
+                          onChange={(e) =>
+                            setReviewData({
+                              ...reviewData,
+                              [order.id]: {
+                                ...reviewData[order.id],
+                                restaurantRating: parseInt(e.target.value, 10) || 0,
+                              },
+                            })
+                          }
+                          style={{ width: "60px", marginBottom: "10px" }}
+                        />
+                      </div>
+                      <div>
+                        <label>Restaurant Comment: </label>
+                        <textarea
+                          value={reviewData[order.id]?.restaurantComment || ""}
+                          onChange={(e) =>
+                            setReviewData({
+                              ...reviewData,
+                              [order.id]: {
+                                ...reviewData[order.id],
+                                restaurantComment: e.target.value,
+                              },
+                            })
+                          }
+                          style={{ width: "100%", height: "80px", marginBottom: "10px" }}
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleSubmitReview(order.id, order)}
+                        style={{ padding: "5px 10px", marginRight: "10px" }}
+                      >
+                        Submit Review
+                      </button>
+                      <button
+                        onClick={() => setShowReviewForm((prev) => ({ ...prev, [order.id]: false }))}
+                        style={{ padding: "5px 10px", background: "#ccc", border: "none" }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowReviewForm((prev) => ({ ...prev, [order.id]: true }))}
+                      style={{ padding: "5px 10px" }}
+                    >
+                      Leave a Review
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

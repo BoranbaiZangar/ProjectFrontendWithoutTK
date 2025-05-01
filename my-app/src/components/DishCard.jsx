@@ -1,10 +1,9 @@
-// src/components/DishCard.js
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Toast from "./Toast";
 
-const DishCard = ({ dish }) => {
+const DishCard = ({ dish, restaurantId }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
@@ -17,13 +16,14 @@ const DishCard = ({ dish }) => {
     }
 
     if (user.role !== "user") {
-      setToast({ message: "Only books sun place warrants", type: "error" });
+      setToast({ message: "Only users can place orders", type: "error" });
       setTimeout(() => setToast(null), 3000);
       return;
     }
 
     const order = {
       userId: user.id,
+      restaurant_id: restaurantId, // Добавляем restaurant_id
       items: [dish],
       status: "In progress",
     };
