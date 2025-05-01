@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/auth";
 import SearchBar from "./SearchBar";
-import "../css/styles.css";  // make sure you define .navbar, .navbar-logo, .navbar-address, etc.
+import "../css/styles.css";
 
 export default function Navbar() {
   const { user } = useSelector((state) => state.auth);
@@ -16,12 +16,10 @@ export default function Navbar() {
   };
 
   const handleSearch = (q) => {
-    // TODO: wire up your real search
     console.log("Search query:", q);
   };
 
   const handleSetAddress = () => {
-    // TODO: open address picker/modal
     console.log("Set delivery address");
   };
 
@@ -29,13 +27,11 @@ export default function Navbar() {
     <nav className="navbar">
       {/* Logo */}
       <Link to="/" className="navbar-logo">
-        {/* optionally replace with <LogoIcon /> */}
         Lamborjeimyn
       </Link>
 
       {/* Search */}
       <SearchBar onSearch={handleSearch} />
-
 
       {/* Auth controls */}
       <div className="navbar-auth">
@@ -45,14 +41,37 @@ export default function Navbar() {
             <Link to="/profile" className="navbar-btn">
               Profile
             </Link>
+            {/* Кнопка для страницы Orders (доступна для user и admin) */}
+            {(user.role === "user" || user.role === "admin") && (
+              <Link to="/orders" className="navbar-btn">
+                Orders
+              </Link>
+            )}
+            {/* Кнопка для страницы Owner Dashboard (доступна для owner) */}
+            {user.role === "owner" && (
+              <Link to="/owner" className="navbar-btn">
+                Owner Dashboard
+              </Link>
+            )}
+            {/* Кнопка для страницы Admin Panel (доступна для admin) */}
+            {user.role === "admin" && (
+              <Link to="/admin" className="navbar-btn">
+                Admin Panel
+              </Link>
+            )}
             <button onClick={handleLogout} className="navbar-btn">
               Logout
             </button>
           </>
         ) : (
-          <Link to="/login" className="navbar-btn navbar-btn--primary">
-            Log In
-          </Link>
+          <>
+            <Link to="/login" className="navbar-btn navbar-btn--primary">
+              Log In
+            </Link>
+            <Link to="/register" className="navbar-btn">
+              Register
+            </Link>
+          </>
         )}
       </div>
     </nav>

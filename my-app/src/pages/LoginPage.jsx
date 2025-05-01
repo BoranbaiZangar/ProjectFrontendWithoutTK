@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/auth";
 import { useNavigate } from "react-router-dom";
 import md5 from "md5";
+import { addToast } from "../redux/toast";
 
 const LoginPage = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -14,21 +15,42 @@ const LoginPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    if (!form.email.includes("@")) {
+      dispatch(addToast({ message: "Email must contain '@' symbol.", type: "error" }));
+      return false;
+    }
+    if (form.password.length < 8) {
+      dispatch(addToast({ message: "Password must be at least 8 characters long.", type: "error" }));
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     const hashedPassword = md5(form.password);
     const formData = { ...form, password: hashedPassword };
 
+    dispatch({ type: "auth/CLEAR_ERROR" });
     await dispatch(login(formData));
   };
 
-  // Егер адам жүйеге кірген болса, оны басты бетке бағыттау
   useEffect(() => {
-    if (user) {
-      navigate("/");
+    if (error) {
+      dispatch(addToast({ message: error, type: "error" }));
+    } else if (user) {
+      dispatch(addToast({ message: "Login successful!", type: "success" }));
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     }
-  }, [user, navigate]);
+  }, [error, user, dispatch, navigate]);
 
   return (
     <div className="container">
@@ -38,7 +60,9 @@ const LoginPage = () => {
           name="email"
           value={form.email}
           onChange={handleChange}
-          placeholder="Email"
+          placeholder="Email (e.g., user@example.com)"
+          type="email"
+          title="Email must contain '@' symbol"
           required
         />
         <input
@@ -46,13 +70,13 @@ const LoginPage = () => {
           type="password"
           value={form.password}
           onChange={handleChange}
-          placeholder="Password"
+          placeholder="Password (min 8 characters)"
+          title="Password must be at least 8 characters"
           required
         />
         <button type="submit" disabled={loading}>
           {loading ? "Loading..." : "Login"}
         </button>
-        {error && <p style={{ color: "#D81B60" }}>{error}</p>}
       </form>
     </div>
   );

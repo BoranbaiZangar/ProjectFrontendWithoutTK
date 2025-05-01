@@ -12,11 +12,12 @@ import AdminPanel from "./pages/AdminPanel";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import NotFound from "./pages/NotFound";
 import ConsoleRoleChanger from "./components/ConsoleRoleChanger"; // Жаңа компонентті импорттаймыз
-
+import ProfilePage from "./pages/ProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const AppRoutes = () => {
   return (
+    
     <>
       <ConsoleRoleChanger /> {/* Компонентті қосамыз, ол барлық маршруттарда жұмыс істейді */}
       <Routes>
@@ -25,11 +26,11 @@ const AppRoutes = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/restaurants" element={<RestaurantsPage />} />
         <Route path="/restaurants/:id" element={<RestaurantDetail />} />
-
+        <Route path="/profile" element={<ProfilePage />} /> 
         <Route
           path="/orders"
           element={
-            <ProtectedRoute roles={["Customer", "Admin"]}>
+            <ProtectedRoute roles={["user", "admin"]}>
               <OrdersPage />
             </ProtectedRoute>
           }
@@ -38,7 +39,7 @@ const AppRoutes = () => {
         <Route
           path="/owner"
           element={
-            <ProtectedRoute roles={["Owner"]}>
+            <ProtectedRoute roles={["owner"]}>
               <OwnerDashboard />
             </ProtectedRoute>
           }
@@ -47,7 +48,7 @@ const AppRoutes = () => {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute roles={["Admin"]}>
+            <ProtectedRoute roles={["admin"]}>
               <AdminPanel />
             </ProtectedRoute>
           }

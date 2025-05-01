@@ -1,147 +1,177 @@
-// src/redux/auth.js
-import md5 from "md5"; // Құпиясөзді шифрлауға арналған md5 кітапханасы
+import md5 from "md5";
+import { v4 as uuidv4 } from "uuid"; // Импортируем uuid для генерации строковых id
 
-// 🏷 Акшн түрлері (Action Types):
-// Бұл жерде әрекеттердің типтерін анықтаймыз
-const LOGIN_REQUEST = "auth/LOGIN_REQUEST"; 
+const LOGIN_REQUEST = "auth/LOGIN_REQUEST";
 const LOGIN_SUCCESS = "auth/LOGIN_SUCCESS";
 const LOGIN_FAILURE = "auth/LOGIN_FAILURE";
-
-const REGISTER_REQUEST = "auth/REGISTER_REQUEST"; 
-const REGISTER_SUCCESS = "auth/REGISTER_SUCCESS"; 
-const REGISTER_FAILURE = "auth/REGISTER_FAILURE"; 
-
-// жүйеден шығу әрекеті
+const REGISTER_REQUEST = "auth/REGISTER_REQUEST";
+const REGISTER_SUCCESS = "auth/REGISTER_SUCCESS";
+const REGISTER_FAILURE = "auth/REGISTER_FAILURE";
 const LOGOUT = "auth/LOGOUT";
-// жаңа әрекет: қолданушы рөлін өзгерту 
-const CHANGE_USER_ROLE = "auth/CHANGE_USER_ROLE"; 
+const CHANGE_USER_ROLE = "auth/CHANGE_USER_ROLE";
+const CLEAR_ERROR = "auth/CLEAR_ERROR";
 
-// Бастапқы күй (Initial State): 
-// Бұл жерде бастапқы мәліметтерді анықтаймыз
 const initialState = {
-  user: JSON.parse(localStorage.getItem("user")) || null, 
-  token: localStorage.getItem("token") || null, 
-  loading: false, 
-  error: null, 
+  user: JSON.parse(localStorage.getItem("user")) || null,
+  token: localStorage.getItem("token") || null,
+  loading: false,
+  error: null,
 };
 
-// 🔁 Редюсер: Бұл функция күйді (state) 
-// басқарады және әрекеттерге (actions) байланысты күйді өзгертеді
 export default function authReducer(state = initialState, action) {
   switch (action.type) {
     case LOGIN_REQUEST:
     case REGISTER_REQUEST:
-      return { ...state, loading: true, error: null }; // Кіру немесе тіркелу басталғанда жүктелу күйін қосамыз, қатені тазартамыз
-
+      return { ...state, loading: true, error: null };
     case LOGIN_SUCCESS:
       return {
         ...state,
-        loading: false, 
-        user: action.payload.user, 
+        loading: false,
+        user: action.payload.user,
         token: action.payload.token,
       };
-
     case REGISTER_SUCCESS:
-      return { ...state, loading: false }; // Тіркелу сәтті болса, жүктелуді өшіреміз
-
+      return { ...state, loading: false };
     case LOGIN_FAILURE:
     case REGISTER_FAILURE:
-      return { ...state, loading: false, error: action.payload }; // Қате болса, жүктелуді өшіріп, қатені сақтаймыз
-
+      return { ...state, loading: false, error: action.payload };
     case LOGOUT:
-      return { ...state, user: null, token: null }; // Жүйеден шыққанда қолданушы мен токенді тазартамыз
-
-    case CHANGE_USER_ROLE: // Жаңа кейс: қолданушы рөлін өзгерту
+      return { ...state, user: null, token: null };
+    case CHANGE_USER_ROLE:
       const updatedUser = { ...state.user, role: action.payload };
-      localStorage.setItem("user", JSON.stringify(updatedUser)); // localStorage-ты жаңартамыз
-      return {
-        ...state,
-        user: updatedUser, // Қолданушы рөлін жаңа рөлге ауыстырамыз
-      };
-
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return { ...state, user: updatedUser };
+    case CLEAR_ERROR:
+      return { ...state, error: null };
     default:
-      return state; // Егер әрекет белгісіз болса, күйді өзгертпейміз
+      return state;
   }
 }
 
-// 📦 Thunk: Кіру әрекеті (Login)
 export const login = (data) => async (dispatch) => {
-  dispatch({ type: LOGIN_REQUEST }); // Кіру әрекетін бастаймыз, жүктелу күйін қосамыз
+  dispatch({ type: LOGIN_REQUEST });
 
   try {
-    // Құпиясөзді шифрлаймыз (md5 арқылы)
-    const hashedPassword = md5(data.password);
+    if (!data.email || !data.password) {
+      throw new Error("Email and password are required.");
+    }
 
-    // Почта арқылы қолданушыны іздейміз (серверден сұрау жібереміз)
+    const hashedPassword = md5(data.password);
     const res = await fetch(`http://localhost:5000/users?email=${data.email}`);
     const users = await res.json();
-    const user = users[0]; // Бірінші қолданушыны аламыз (почта бірегей болғандықтан бір ғана болады)
+    const user = users[0];
 
-    // Егер қолданушы табылмаса, қате шығарамыз
     if (!user) {
       throw new Error("No user found with this email address.");
     }
 
-    // Шифрланған құпиясөздерді салыстырамыз
     if (user.password !== hashedPassword) {
       throw new Error("Password incorrect");
     }
 
-    // Токен жасаймыз (жалған токен, мысал ретінде)
-    const token = "fake-token-" + user.id;
-    localStorage.setItem("token", token); // Токенді localStorage-қа сақтаймыз
-    localStorage.setItem("user", JSON.stringify(user)); // Қолданушыны localStorage-қа сақтаймыз
+    if (user.status !== "active") {
+      throw new Error("User account is blocked.");
+    }
 
-    // Кіру әрекеті сәтті болды, күйді жаңартамыз
+    const token = "fake-token-" + user.id;
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
     dispatch({ type: LOGIN_SUCCESS, payload: { user, token } });
   } catch (err) {
-    // Қате болса, қатені сақтаймыз
     dispatch({ type: LOGIN_FAILURE, payload: err.message });
   }
 };
 
-// 📦 Thunk: Тіркелу әрекеті (Register)
 export const register = (data) => async (dispatch) => {
-  dispatch({ type: REGISTER_REQUEST }); // Тіркелу әрекетін бастаймыз, жүктелу күйін қосамыз
+  dispatch({ type: REGISTER_REQUEST });
 
   try {
-    // Алдымен почтаның бар-жоғын тексереміз
-    const resCheck = await fetch(
-      `http://localhost:5000/users?email=${data.email}`
-    );
+    const resCheck = await fetch(`http://localhost:5000/users?email=${data.email}`);
     const users = await resCheck.json();
 
-    // Егер осы почта бұрыннан тіркелген болса, қате шығарамыз
     if (users.length > 0) {
       throw new Error("This email is already registered.");
     }
 
-    // Құпиясөзді шифрлаймыз және қолданушы мәліметтерін дайындаймыз
     const hashedPassword = md5(data.password);
-    const userData = { ...data, password: hashedPassword };
+    const userId = uuidv4(); // Генерируем строковый id через uuid
+    const userData = {
+      id: userId,
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      phone: data.phone || "",
+      role: data.role || "user",
+      created_at: new Date().toISOString(),
+      status: "active",
+    };
 
-    // Серверге жаңа қолданушыны қосу үшін сұрау жібереміз
     const res = await fetch("http://localhost:5000/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
     });
 
-    // Егер сұрау сәтсіз болса, қате шығарамыз
     if (!res.ok) throw new Error("An error occurred during registration.");
 
-    await res.json();
-    dispatch({ type: REGISTER_SUCCESS }); // Тіркелу сәтті болды
+    const newUser = await res.json();
+
+    // Создаем дополнительные записи в зависимости от роли
+    if (data.role === "user") {
+      await fetch("http://localhost:5000/user_profiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId, // Используем строковый id
+          address: "",
+          avatar_url: "",
+          id: uuidv4(), // Генерируем id для записи
+        }),
+      });
+    } else if (data.role === "courier") {
+      await fetch("http://localhost:5000/couriers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId, // Используем строковый id
+          vehicle_type: "bicycle",
+          is_available: true,
+          id: uuidv4(), // Генерируем id для записи
+        }),
+      });
+    } else if (data.role === "owner") {
+      await fetch("http://localhost:5000/restaurant_owners", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId, // Используем строковый id
+          restaurant_id: null,
+          id: uuidv4(), // Генерируем id для записи
+        }),
+      });
+    }
+
+    dispatch({ type: REGISTER_SUCCESS });
   } catch (err) {
-    // Қате болса, қатені сақтаймыз
     dispatch({ type: REGISTER_FAILURE, payload: err.message });
   }
 };
 
-// 📦 Thunk: Рөлді серверде жаңарту
+export const logout = () => (dispatch) => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  dispatch({ type: LOGOUT });
+};
+
+export const changeUserRole = (newRole) => ({
+  type: CHANGE_USER_ROLE,
+  payload: newRole,
+});
+
 export const updateUserRoleOnServer = (userId, newRole) => async (dispatch) => {
   try {
-    const res = await fetch(`http://localhost:5000/users/${userId}`, {
+    const res = await fetch(`http://localhost:5000/users/${String(userId)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role: newRole }),
@@ -152,22 +182,13 @@ export const updateUserRoleOnServer = (userId, newRole) => async (dispatch) => {
     }
 
     const updatedUser = await res.json();
-    localStorage.setItem("user", JSON.stringify(updatedUser)); // localStorage-ты жаңартамыз
-    dispatch({ type: CHANGE_USER_ROLE, payload: newRole }); // Redux күйін жаңартамыз
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    dispatch({ type: CHANGE_USER_ROLE, payload: newRole });
   } catch (err) {
-    console.error("Рөлді серверде жаңарту қатесі:", err.message);
+    console.error("Error updating role on server:", err.message);
   }
 };
 
-// 📦 Логаут: Жүйеден шығу әрекеті
-export const logout = () => (dispatch) => {
-  localStorage.removeItem("token"); // localStorage-тан токенді өшіреміз
-  localStorage.removeItem("user"); // localStorage-тан қолданушыны өшіреміз
-  dispatch({ type: LOGOUT }); // Күйді тазартамыз
-};
-
-// 📦 Жаңа әрекет: Қолданушы рөлін өзгерту
-export const changeUserRole = (newRole) => ({
-  type: CHANGE_USER_ROLE,
-  payload: newRole,
+export const clearError = () => ({
+  type: CLEAR_ERROR,
 });

@@ -1,12 +1,11 @@
-// src/pages/RestaurantDetail.jsx
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
   fetchRestaurantById,
   clearSelectedRestaurant,
-  fetchOwnerById, // Новое действие
-  clearOwner, // Новое действие
+  fetchOwnerById,
+  clearOwner,
 } from "../redux/restaurants";
 import DishCard from "../components/DishCard";
 
@@ -14,43 +13,61 @@ const RestaurantDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  // Get state from Redux
   const { selected: restaurant, owner, loading, error } = useSelector(
     (state) => state.restaurants
   );
+  const { user } = useSelector((state) => state.auth);
 
-  // Fetch restaurant and owner data on mount, clear on unmount
   useEffect(() => {
-    // Загружаем данные ресторана
+    if (!id || id.trim() === "") {
+      dispatch({
+        type: "FETCH_RESTAURANTS_FAILURE",
+        payload: "Invalid restaurant ID",
+      });
+      return;
+    }
+
     dispatch(fetchRestaurantById(id));
 
     return () => {
       dispatch(clearSelectedRestaurant());
-      dispatch(clearOwner()); // Очищаем данные владельца при размонтировании
+      dispatch(clearOwner());
     };
   }, [dispatch, id]);
 
-  // Загружаем данные владельца, если ресторан уже загружен
   useEffect(() => {
-    if (restaurant && restaurant.ownerId) {
-      dispatch(fetchOwnerById(restaurant.ownerId)); // Загружаем владельца по ownerId ресторана
+    if (restaurant && restaurant.owner_id) {
+      dispatch(fetchOwnerById(restaurant.owner_id));
     }
   }, [dispatch, restaurant]);
 
-  // Loading state
   if (loading) return <p className="loading">Loading restaurant...</p>;
 
-  // Error state
   if (error) {
     return (
       <p className="error">
-        Error: {typeof error === "string" ? error : JSON.stringify(error)}
+        {error === "Failed to fetch restaurant"
+          ? "Could not load the restaurant. It may not exist or the server is unavailable."
+          : error === "Invalid restaurant ID"
+          ? "The restaurant ID is invalid. Please check the URL."
+          : `Error: ${typeof error === "string" ? error : JSON.stringify(error)}`}
       </p>
     );
   }
 
-  // No restaurant found
   if (!restaurant) return <p className="not-found">Restaurant not found</p>;
+
+  const isOwner = user?.id && restaurant.owner_id === user.id;
+  const userRole = user?.role || "guest"; // Если user или role отсутствует, считаем "guest"
+  const canViewRestaurant =
+    userRole === "admin" ||
+    userRole === "moderator" ||
+    (userRole === "owner" && isOwner) ||
+    restaurant.status === "active";
+
+  if (!canViewRestaurant) {
+    return <p className="not-found">You do not have permission to view this restaurant.</p>;
+  }
 
   return (
     <div className="restaurant-detail container">

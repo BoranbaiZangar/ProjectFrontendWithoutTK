@@ -1,42 +1,63 @@
-// src/pages/RegisterPage.js
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { register } from "../redux/auth";
 import { useNavigate } from "react-router-dom";
-import md5 from "md5"; // Импортируем MD5
+import md5 from "md5";
+import { addToast } from "../redux/toast";
 
 const RegisterPage = () => {
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    role: "Customer",
+    phone: "",
+    role: "user",
   });
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.auth); // Получаем error на верхнем уровне
+  const { loading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    // Проверка email на наличие @
+    if (!form.email.includes("@")) {
+      dispatch(addToast({ message: "Email must contain '@' symbol.", type: "error" }));
+      return false;
+    }
+
+    // Проверка длины пароля
+    if (form.password.length < 8) {
+      dispatch(addToast({ message: "Password must be at least 8 characters long.", type: "error" }));
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // құпиясөзді мд5 арқылы хэшировать ету
+    // Валидация формы перед отправкой
+    if (!validateForm()) {
+      return;
+    }
+
     const hashedPassword = md5(form.password);
     const formData = { ...form, password: hashedPassword };
 
-    // ақпараттарды регистрацияға жібереміз крч
+    dispatch(addToast({ message: "Attempting registration...", type: "default" }));
+
     await dispatch(register(formData));
 
-    // ошибкаларға тексереміз
-    // егер ошибка болмаса, онда логинге жібереміз
-    // егер ошибка болса, онда ештеңе болмайды
-
     if (!error) {
+      dispatch(addToast({ message: "Registration successful! Please log in.", type: "success" }));
       navigate("/login");
+    } else {
+      dispatch(addToast({ message: error || "Registration failed.", type: "error" }));
     }
   };
 
@@ -56,6 +77,15 @@ const RegisterPage = () => {
           value={form.email}
           onChange={handleChange}
           placeholder="Email"
+          type="email"
+          required
+        />
+        <input
+          name="phone"
+          value={form.phone}
+          onChange={handleChange}
+          placeholder="Phone"
+          type="tel"
           required
         />
         <input
@@ -67,8 +97,9 @@ const RegisterPage = () => {
           required
         />
         <select name="role" value={form.role} onChange={handleChange}>
-          <option value="Customer">I'm Customer</option>
-          <option value="Owner">I'm Owner</option>
+          <option value="user">User</option>
+          <option value="courier">Courier</option>
+          <option value="owner">Restaurant Owner</option>
         </select>
         <button type="submit" disabled={loading}>
           {loading ? "Loading..." : "Register"}

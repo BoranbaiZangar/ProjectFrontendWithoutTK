@@ -1,0 +1,26 @@
+/* layout */
+.hp-wrapper     { padding: 2rem 1.5rem; max-width: 1280px; margin: 0 auto; }
+.hp-header      { display:flex; justify-content:space-between; align-items:end; margin-bottom:1.25rem; }
+.hp-title       { font-size:1.7rem; font-weight:700; margin:0; }
+.hp-link-all    { font-size:.95rem; color:#6d2e46; text-decoration:none; font-weight:600; }
+
+/* grid */
+.hp-grid        { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.25rem; }
+.hp-card        { display:flex; flex-direction:column; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.05); text-decoration:none; color:#333; transition:transform .18s ease; }
+.hp-card:hover  { transform:translateY(-3px); }
+.hp-card-img    { width:100%; padding-top:66%; background-size:cover; background-position:center; }
+.hp-card-body   { padding:.9rem 1rem 1.1rem; }
+.hp-card-name   { font-size:1.05rem; font-weight:600; margin:.1rem 0 .35rem; }
+.hp-card-desc   { font-size:.85rem; color:#666; line-height:1.35; }
+
+/* info / loading */
+.hp-info  { text-align:center; color:#888; margin-top:2rem; }
+.hp-error { text-align:center; color:#c0392b; margin-top:2rem; }
+
+/* auth buttons */
+.hp-auth { margin:2.5rem auto 0; display:flex; gap:.8rem; justify-content:center; }
+.hp-btn  { padding:.55rem 1.3rem; border-radius:6px; font-weight:600; background:#6d2e46; color:#fff; text-decoration:none; }
+.hp-btn--ghost { background:#fff; color:#6d2e46; border:2px solid #6d2e46; }
+.hp-btn--ghost:hover { background:#fdf4d6; }
+
+.hp-hello { text-align:center; margin-top:2rem; font-weight:500; font-size:1rem; }
