@@ -1,24 +1,21 @@
-// src/components/DishCard.js
-import React, { useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import Toast from "./Toast";
+import { toast } from "../toast";            // ← путь поправьте при необходимости
 
 const DishCard = ({ dish }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  const [toast, setToast] = useState(null);
 
   const handleOrder = async () => {
+    // not logged in
     if (!user) {
-      setToast({ message: "Please log in to your account", type: "error" });
-      setTimeout(() => setToast(null), 3000);
+      toast.error("Please log in to your account", { autoClose: 3000 });
       return;
     }
-
+    // wrong role
     if (user.role !== "Customer") {
-      setToast({ message: "Only books sun place warrants", type: "error" });
-      setTimeout(() => setToast(null), 3000);
+      toast.error("Only customers can place orders", { autoClose: 3000 });
       return;
     }
 
@@ -31,22 +28,15 @@ const DishCard = ({ dish }) => {
     try {
       const res = await fetch("http://localhost:5000/orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(order),
       });
+      if (!res.ok) throw new Error();
 
-      if (!res.ok) throw new Error("Ошибка при создании заказа");
-
-      setToast({ message: "Order successfully placed!", type: "success" });
-      setTimeout(() => {
-        setToast(null);
-        navigate("/orders");
-      }, 1500);
-    } catch (err) {
-      setToast({ message: "Error while ordering", type: "error" });
-      setTimeout(() => setToast(null), 3000);
+      toast.success("Order successfully placed!", { autoClose: 1500 });
+      setTimeout(() => navigate("/orders"), 1500);
+    } catch {
+      toast.error("Error while ordering", { autoClose: 3000 });
     }
   };
 
@@ -80,8 +70,6 @@ const DishCard = ({ dish }) => {
           Place an order
         </button>
       )}
-
-      {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
 };

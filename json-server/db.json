@@ -27,6 +27,20 @@
       "email": "Customer@example.com",
       "password": "39dcff5e56fe91c92dacfdd112bdee9a",
       "role": "Customer"
+    },
+    {
+      "id": "6e91",
+      "name": "asdsd",
+      "email": "asdasd",
+      "password": "a81d303d21d19607e3007652c1e33395",
+      "role": "Customer"
+    },
+    {
+      "id": "b1fb",
+      "name": "dfd",
+      "email": "fdfd",
+      "password": "d090456e298c89575c2b266a802f5e49",
+      "role": "Customer"
     }
   ],
   "restaurants": [

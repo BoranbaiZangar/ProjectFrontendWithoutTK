@@ -5,6 +5,7 @@ import restaurantReducer from "./restaurants";
 import orderReducer from "./orders";
 import userReducer from "./auth";
 import dishReducer from "./dishes";
+import toastReducer      from "./toast";   
 
 const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ const store = configureStore({
     orders: orderReducer,
     users: userReducer,
     dishes: dishReducer,
+    toasts:      toastReducer,
   },
 });
 

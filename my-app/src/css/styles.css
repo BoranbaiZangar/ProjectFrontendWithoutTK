@@ -656,5 +656,88 @@ p[style*="color: red"] {
   .delete-button {
     padding: 6px 12px;
     font-size: 0.9rem;
+ 
   }
+}
+
+
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  gap: 1rem;
+}
+
+/* SearchBar */
+.search-bar {
+  display: flex;
+  flex: 1;
+  max-width: 600px;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  overflow: hidden;
+}
+.search-input {
+  flex: 1;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+.search-btn {
+  border: none;
+  background: #6B1E3A;
+  padding: 0.5rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.search-btn:hover {
+  background: #6B1E3A;
+}
+
+/* Address button */
+.navbar-address {
+  background: #6B1E3A;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.navbar-address:hover {
+  background: #6B1E3A;
+}
+
+/* Language */
+.navbar-lang {
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Auth */
+.navbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.navbar-btn {
+  background: transparent;
+  border: 1px solid #3e2a1d;
+  color: #3e2a1d;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.navbar-btn:hover {
+  background: #3e2a1d;
+  color: #fff;
+}
+.navbar-btn--primary {
+  background: #3e2a1d;
+  color: #fff;
 }
