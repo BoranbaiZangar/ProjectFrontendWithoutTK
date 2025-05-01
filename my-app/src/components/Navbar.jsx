@@ -42,7 +42,7 @@ export default function Navbar() {
               Profile
             </Link>
             {/* Кнопка для страницы Orders (доступна для user и admin) */}
-            {(user.role === "user" || user.role === "admin") && (
+            {(user.role !=="admin","owner" ) && (
               <Link to="/orders" className="navbar-btn">
                 Orders
               </Link>

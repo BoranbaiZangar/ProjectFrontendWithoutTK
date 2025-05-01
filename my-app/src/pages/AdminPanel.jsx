@@ -1,4 +1,3 @@
-// src/pages/AdminPanel.js
 import React, { useEffect, useState } from "react";
 import ConfirmModal from "../components/ConfirmModal";
 
@@ -8,10 +7,12 @@ const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   // Растау модалын көрсету/жасыру күйі
   const [showConfirm, setShowConfirm] = useState(false);
-  // Жойылатын қолданушының ID-ін сақтауға арналған күй
+  // Бан/разбан істейтін қолданушының ID-ін сақтауға арналған күй
   const [selectedUserId, setSelectedUserId] = useState(null);
+  // Бан немесе разбан әрекетін анықтауға арналған күй (true - бан, false - разбан)
+  const [isBanning, setIsBanning] = useState(true);
   // Қолданушы рөлдерінің тізімі
-  const roles = ["Customer", "Owner", "Admin"];
+  const roles = ["user", "owner", "admin", "courier", "moderator"];
 
   // Серверден қолданушыларды алу функциясы
   const fetchUsers = async () => {
@@ -39,53 +40,31 @@ const AdminPanel = () => {
     fetchUsers();
   };
 
-  // Жоюды растау модалын көрсету функциясы
-  const confirmDelete = (userId) => {
+  // Бан/разбан растау модалын көрсету функциясы
+  const confirmBanUnban = (userId, actionIsBan) => {
     setSelectedUserId(userId);
+    setIsBanning(actionIsBan);
     setShowConfirm(true);
   };
 
-  // Қолданушыны және оның байланысты деректерін жою функциясы
-  const handleDeleteConfirmed = async () => {
+  // Қолданушыны бан/разбан ету функциясы
+  const handleBanUnbanConfirmed = async () => {
     try {
-      // Жойылатын қолданушыны аламыз
-      const userToDelete = users.find((u) => u.id === selectedUserId);
-      if (!userToDelete) {
+      // Бан/разбан істейтін қолданушыны аламыз
+      const userToUpdate = users.find((u) => u.id === selectedUserId);
+      if (!userToUpdate) {
         throw new Error("User not found");
       }
 
-      // Рөлге байланысты байланысты деректерді жоямыз
-      if (userToDelete.role === "Owner") {
-        // Owner рөліндегі қолданушының ресторандарын жоямыз
-        const resRestaurants = await fetch(
-          `http://localhost:5000/restaurants?ownerId=${selectedUserId}`
-        );
-        const restaurants = await resRestaurants.json();
+      // Жаңа статус: "banned" немесе "active"
+      const newStatus = isBanning ? "banned" : "active";
+      const updatedUser = { ...userToUpdate, status: newStatus };
 
-        // Әр ресторанды жоямыз
-        for (const restaurant of restaurants) {
-          await fetch(`http://localhost:5000/restaurants/${restaurant.id}`, {
-            method: "DELETE",
-          });
-        }
-      } else if (userToDelete.role === "Customer") {
-        // Customer рөліндегі қолданушының тапсырыстарын жоямыз
-        const resOrders = await fetch(
-          `http://localhost:5000/orders?userId=${selectedUserId}`
-        );
-        const orders = await resOrders.json();
-
-        // Әр тапсырысты жоямыз
-        for (const order of orders) {
-          await fetch(`http://localhost:5000/orders/${order.id}`, {
-            method: "DELETE",
-          });
-        }
-      }
-
-      // Соңында қолданушыны жоямыз
+      // Қолданушы статусын жаңарту
       await fetch(`http://localhost:5000/users/${selectedUserId}`, {
-        method: "DELETE",
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedUser),
       });
 
       // Модальді жабамыз және күйді жаңартамыз
@@ -93,7 +72,7 @@ const AdminPanel = () => {
       setSelectedUserId(null);
       fetchUsers();
     } catch (err) {
-      console.error("Қолданушыны жою кезінде қате пайда болды:", err.message);
+      console.error("Қолданушыны бан/разбан кезінде қате пайда болды:", err.message);
       setShowConfirm(false);
       setSelectedUserId(null);
     }
@@ -112,8 +91,9 @@ const AdminPanel = () => {
               <th>Name</th>
               <th>Email</th>
               <th>Role</th>
+              <th>Status</th>
               <th>Change Role</th>
-              <th>Delete</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -123,6 +103,7 @@ const AdminPanel = () => {
                 <td>{u.name}</td>
                 <td>{u.email}</td>
                 <td>{u.role}</td>
+                <td>{u.status}</td>
                 <td>
                   <select
                     value={u.role}
@@ -138,10 +119,10 @@ const AdminPanel = () => {
                 </td>
                 <td>
                   <button
-                    onClick={() => confirmDelete(u.id)}
-                    className="delete-button"
+                    onClick={() => confirmBanUnban(u.id, u.status === "active")}
+                    className={u.status === "active" ? "ban-button" : "unban-button"}
                   >
-                    Delete
+                    {u.status === "active" ? "Ban" : "Unban"}
                   </button>
                 </td>
               </tr>
@@ -152,8 +133,12 @@ const AdminPanel = () => {
 
       {showConfirm && (
         <ConfirmModal
-          message="Are you sure you want to delete this user?"
-          onConfirm={handleDeleteConfirmed}
+          message={
+            isBanning
+              ? "Are you sure you want to ban this user?"
+              : "Are you sure you want to unban this user?"
+          }
+          onConfirm={handleBanUnbanConfirmed}
           onCancel={() => setShowConfirm(false)}
         />
       )}

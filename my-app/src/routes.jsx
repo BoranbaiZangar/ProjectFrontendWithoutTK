@@ -30,7 +30,7 @@ const AppRoutes = () => {
         <Route
           path="/orders"
           element={
-            <ProtectedRoute roles={["user", "admin"]}>
+            <ProtectedRoute roles={["user", "admin", "moderator","courier"]}>
               <OrdersPage />
             </ProtectedRoute>
           }

