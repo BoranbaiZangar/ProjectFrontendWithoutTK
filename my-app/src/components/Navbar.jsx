@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -6,34 +7,29 @@ import SearchBar from "./SearchBar";
 import "../css/styles.css";
 
 export default function Navbar() {
-  const { user } = useSelector((state) => state.auth);
+  const authState = useSelector((state) => state.auth);
+  const user = authState.user;
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  function handleLogout() {
     dispatch(logout());
     navigate("/login");
-  };
+  }
 
-  const handleSearch = (q) => {
-    console.log("Search query:", q);
-  };
-
-  const handleSetAddress = () => {
-    console.log("Set delivery address");
-  };
+  function handleSearch(query) {
+    // Реализуйте логику перенаправления или фильтрации
+    console.log("Search query:", query);
+  }
 
   return (
     <nav className="navbar">
-      {/* Logo */}
       <Link to="/" className="navbar-logo">
         Lamborjeimyn
       </Link>
 
-      {/* Search */}
       <SearchBar onSearch={handleSearch} />
 
-      {/* Auth controls */}
       <div className="navbar-auth">
         {user ? (
           <>
@@ -41,22 +37,30 @@ export default function Navbar() {
             <Link to="/profile" className="navbar-btn">
               Profile
             </Link>
-            {/* Кнопка для страницы Orders (доступна для user и admin) */}
-            {(user.role !=="admin","owner" ) && (
+            {user.role === "user" && (
+              <Link to="/cart" className="navbar-btn">
+              Cart
+            </Link>
+            )}
+            
+            {(user.role === "user" || user.role === "admin" || user.role === "moderator" || user.role === "courier") && (
               <Link to="/orders" className="navbar-btn">
                 Orders
               </Link>
             )}
-            {/* Кнопка для страницы Owner Dashboard (доступна для owner) */}
             {user.role === "owner" && (
               <Link to="/owner" className="navbar-btn">
                 Owner Dashboard
               </Link>
             )}
-            {/* Кнопка для страницы Admin Panel (доступна для admin) */}
             {user.role === "admin" && (
               <Link to="/admin" className="navbar-btn">
                 Admin Panel
+              </Link>
+            )}
+            {user.role === "admin" && (
+              <Link to="/admin-stats" className="navbar-btn">
+                Admin Stats
               </Link>
             )}
             <button onClick={handleLogout} className="navbar-btn">

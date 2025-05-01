@@ -1,89 +1,37 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import Toast from "./Toast";
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { addToCart } from "../redux/cart";
+import { addToast } from "../redux/toast";
 
-const DishCard = ({ dish, restaurantId }) => {
-  const { user } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
-  const [toast, setToast] = useState(null);
+export default function DishCard(props) {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+  const { id, name, price } = props.dish;
+  const restaurantId = props.restaurantId;
 
-  const handleOrder = async () => {
+  function handleAddToCart() {
     if (!user) {
-      setToast({ message: "Please log in to your account", type: "error" });
-      setTimeout(() => setToast(null), 3000);
+      alert("Please log in to add items to cart.");
       return;
     }
-
     if (user.role !== "user") {
-      setToast({ message: "Only users can place orders", type: "error" });
-      setTimeout(() => setToast(null), 3000);
+      alert("Only users can add items to cart.");
       return;
     }
 
-    const order = {
-      userId: user.id,
-      restaurant_id: restaurantId, // Добавляем restaurant_id
-      items: [dish],
-      status: "In progress",
-    };
-
-    try {
-      const res = await fetch("http://localhost:5000/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(order),
-      });
-
-      if (!res.ok) throw new Error("Ошибка при создании заказа");
-
-      setToast({ message: "Order successfully placed!", type: "success" });
-      setTimeout(() => {
-        setToast(null);
-        navigate("/orders");
-      }, 1500);
-    } catch (err) {
-      setToast({ message: "Error while ordering", type: "error" });
-      setTimeout(() => setToast(null), 3000);
-    }
-  };
+    dispatch(
+      addToCart({ id, name, price, restaurantId })
+    );
+    dispatch(
+      addToast({ message: `${name} successfully added to cart`, type: "success" })
+    );
+  }
 
   return (
-    <div
-      style={{
-        border: "1px solid #ddd",
-        borderRadius: "10px",
-        padding: "1rem",
-        marginBottom: "1rem",
-        boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-        backgroundColor: "#fff",
-      }}
-    >
-      <h4 style={{ marginBottom: "0.5rem" }}>{dish.name}</h4>
-      <p style={{ fontSize: "14px", color: "#555" }}>Price: {dish.price} ₸</p>
-
-      {user?.role === "user" && (
-        <button
-          onClick={handleOrder}
-          style={{
-            padding: "0.5rem 1rem",
-            backgroundColor: "#3498db",
-            color: "#fff",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            marginTop: "0.5rem",
-          }}
-        >
-          Place an order
-        </button>
-      )}
-
-      {toast && <Toast message={toast.message} type={toast.type} />}
+    <div style={{ border: "1px solid #ddd", borderRadius: 10, padding: 16, marginBottom: 16, background: "#fff" }}>
+      <h4>{name}</h4>
+      <p>Price: ₸{price}</p>
+      <button onClick={handleAddToCart}>Add to Cart</button>
     </div>
   );
-};
-
-export default DishCard;
+}

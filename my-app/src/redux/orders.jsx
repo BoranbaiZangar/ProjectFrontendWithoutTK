@@ -1,5 +1,5 @@
 import { addToast } from "./toast";
-
+import { clearCart } from "./cart";
 // Action Types
 const FETCH_ORDERS_REQUEST = "orders/FETCH_ORDERS_REQUEST";
 const FETCH_ORDERS_SUCCESS = "orders/FETCH_ORDERS_SUCCESS";
@@ -12,6 +12,10 @@ const FETCH_REVIEWS_REQUEST = "orders/FETCH_REVIEWS_REQUEST";
 const FETCH_REVIEWS_SUCCESS = "orders/FETCH_REVIEWS_SUCCESS";
 const FETCH_REVIEWS_FAILURE = "orders/FETCH_REVIEWS_FAILURE";
 const LOAD_STATE_FROM_STORAGE = "orders/LOAD_STATE_FROM_STORAGE";
+const CREATE_ORDER_REQUEST = "orders/CREATE_ORDER_REQUEST";
+const CREATE_ORDER_SUCCESS = "orders/CREATE_ORDER_SUCCESS";
+const CREATE_ORDER_FAILURE = "orders/CREATE_ORDER_FAILURE";
+const API_URL = "http://localhost:5000";
 
 // Load initial state from localStorage
 const loadStateFromStorage = () => {
@@ -304,6 +308,23 @@ export const assignCourier = (orderId, courierUserId) => async (dispatch, getSta
   }
 };
 
+export const createOrder = (orderData) => async (dispatch) => {
+  dispatch({ type: CREATE_ORDER_REQUEST });
+  try {
+    const response = await fetch(`${API_URL}/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+  });
+    if (!response.ok) throw new Error(`Create order failed: ${response.status}`);
+    const data = await response.json();
+    dispatch({ type: CREATE_ORDER_SUCCESS, payload: data });
+    dispatch(clearCart());
+    dispatch(fetchOrders({ userId: orderData.userId }));
+  } catch (err) {
+    dispatch({ type: CREATE_ORDER_FAILURE, payload: err.message });
+  }
+};
 // Submit review
 export const submitReview = (reviewData) => async (dispatch, getState) => {
   try {
