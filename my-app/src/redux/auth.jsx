@@ -10,6 +10,7 @@ const REGISTER_FAILURE = "auth/REGISTER_FAILURE";
 const LOGOUT = "auth/LOGOUT";
 const CHANGE_USER_ROLE = "auth/CHANGE_USER_ROLE";
 const CLEAR_ERROR = "auth/CLEAR_ERROR";
+const UPDATE_USER = "auth/UPDATE_USER"; 
 
 const initialState = {
   user: JSON.parse(localStorage.getItem("user")) || null,
@@ -43,6 +44,13 @@ export default function authReducer(state = initialState, action) {
       return { ...state, user: updatedUser };
     case CLEAR_ERROR:
       return { ...state, error: null };
+      case UPDATE_USER:
+  localStorage.setItem("user", JSON.stringify(action.payload)); // Обновим localStorage тоже
+  return {
+    ...state,
+    user: action.payload,
+  };
+
     default:
       return state;
   }
@@ -115,7 +123,7 @@ export const register = (data) => async (dispatch) => {
 
     if (!res.ok) throw new Error("An error occurred during registration.");
 
-    const newUser = await res.json();
+    // const newUser = await res.json();
 
     // Создаем дополнительные записи в зависимости от роли
     if (data.role === "user") {

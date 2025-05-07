@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import md5 from "md5";
 import { fetchReviews } from "../redux/orders";
+import ImageUploader from "../components/ImageUploader"; // путь подстрой под структуру
+
+
+
+
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -14,9 +19,14 @@ const ProfilePage = () => {
   const [restaurantOwners, setRestaurantOwners] = useState([]);
   const [newPassword, setNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
+  // const [passwordSuccess, setPasswordSuccess] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [avatarReset, setAvatarReset] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", address: "" });
+const [saveSuccess, setSaveSuccess] = useState("");
+
+
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -37,6 +47,14 @@ const ProfilePage = () => {
         const profileRes = await fetch(`http://localhost:5000/user_profiles?user_id=${user.id}`);
         const profileData = await profileRes.json();
         setProfileData(profileData[0] || {});
+
+        setFormData({
+          name: user.name || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          address: profileData[0]?.address || "",
+        });
+        
 
         if (user.role === "courier") {
           const courierRes = await fetch(`http://localhost:5000/couriers?user_id=${user.id}`);
@@ -69,34 +87,101 @@ const ProfilePage = () => {
     }
   }, [user, dispatch]);
 
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
+  const handleProfileSubmit = async (e) => {
+  e.preventDefault();
+  setPasswordError("");
+  setSaveSuccess("");
 
-    if (newPassword.length < 8) {
-      setPasswordError("Password must be at least 8 characters long.");
-      return;
-    }
+  if (newPassword && newPassword.length < 8) {
+    setPasswordError("Пароль должен содержать не менее 8 символов.");
+    return;
+  }
 
+  try {
+    await fetch(`http://localhost:5000/users/${user.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        ...(newPassword && { password: md5(newPassword) }),
+      }),
+    });
+
+    await fetch(`http://localhost:5000/user_profiles/${profileData.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address: formData.address }),
+    });
+
+    setSaveSuccess("Профиль успешно обновлён!");
+    setNewPassword("");
+  } catch (err) {
+    console.error("Ошибка при обновлении:", err);
+    setPasswordError("Произошла ошибка при обновлении профиля.");
+  }
+  setProfileData((prev) => ({ ...prev, address: formData.address }));
+
+setFormData((prev) => ({
+  ...prev,
+  name: formData.name,
+  email: formData.email,
+  phone: formData.phone,
+}));
+dispatch({
+  type: "auth/UPDATE_USER",
+  payload: {
+    ...user,
+    name: formData.name,
+    email: formData.email,
+    phone: formData.phone,
+  },
+});
+
+};
+
+
+  const handleAvatarUpload = async (base64Image) => {
     try {
-      const hashedPassword = md5(newPassword);
-      const res = await fetch(`http://localhost:5000/users/${user.id}`, {
+      const res = await fetch(`http://localhost:5000/user_profiles/${profileData.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: hashedPassword }),
+        body: JSON.stringify({ avatar_url: base64Image }),
       });
 
       if (res.ok) {
-        setPasswordSuccess("Password updated successfully!");
-        setNewPassword("");
+        setProfileData((prev) => ({ ...prev, avatar_url: base64Image }));
       } else {
-        setPasswordError("Failed to update password.");
+        console.error("Failed to update avatar.");
       }
     } catch (err) {
-      setPasswordError("An error occurred while updating the password.");
+      console.error("Error updating avatar:", err);
     }
   };
+  const handleAvatarDelete = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/user_profiles/${profileData.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: "" }),
+      });
+  
+      if (res.ok) {
+        localStorage.removeItem("avatarImage");
+        setProfileData((prev) => ({ ...prev, avatar_url: "" }));
+        setAvatarReset(true); // 🔁 блокируем повторную подгрузку
+      } else {
+        console.error("Failed to delete avatar.");
+      }
+    } catch (err) {
+      console.error("Error deleting avatar:", err);
+    }
+  };
+<ImageUploader onUpload={handleAvatarUpload} reset={avatarReset} />
+  
+  
+  
 
   if (!user) {
     return <div style={{ padding: "20px" }}>Please log in to view your profile.</div>;
@@ -194,7 +279,7 @@ const ProfilePage = () => {
     }
 
     if (user.role === "courier") {
-      const { totalOrders, recentOrders } = getOrdersStats(orders, user.id, "courier");
+      const {recentOrders } = getOrdersStats(orders, user.id, "courier");
       const totalDeliveries = getAverageOrdersPerDay(orders, user.id);
       const averageRating = getCourierAverageRating();
 
@@ -330,11 +415,17 @@ const ProfilePage = () => {
   return (
     <div style={{ padding: "20px" }}>
       <div style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
-        <img
-          src={profileData?.avatar_url || "https://via.placeholder.com/100"}
-          alt="Profile"
-          style={{ width: "100px", height: "100px", borderRadius: "50%", marginRight: "20px" }}
-        />
+      <img
+  key={profileData?.avatar_url || "default"}
+  src={
+    profileData?.avatar_url ||
+    localStorage.getItem("avatarImage") ||
+    "/default-avatar.png"
+  }
+  alt="Profile"
+  className="profile-avatar"
+/>
+
         <div>
           <h2>{user.name}'s Profile</h2>
           <p>Role: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
@@ -343,24 +434,61 @@ const ProfilePage = () => {
 
       {renderProfile()}
 
-      <div>
-        <h3>Account Settings</h3>
-        <button style={{ padding: "5px 10px", marginBottom: "10px" }}>Edit Profile</button>
-        <form onSubmit={handlePasswordChange}>
-          <h4>Change Password</h4>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="New Password (min 8 characters)"
-            required
-            style={{ padding: "5px", marginBottom: "10px", width: "200px" }}
-          />
-          {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
-          {passwordSuccess && <p style={{ color: "green" }}>{passwordSuccess}</p>}
-          <button type="submit" style={{ padding: "5px 10px" }}>Update Password</button>
-        </form>
-      </div>
+      <div style={{ marginTop: "10px" }}>
+  <ImageUploader onUpload={handleAvatarUpload} />
+  {profileData?.avatar_url && (
+    <button className="edit-profile-btn" onClick={handleAvatarDelete}>
+      Удалить аватар
+    </button>
+  )}
+</div>
+
+
+<div style={{ marginTop: "30px" }}>
+  <h3>Account Settings</h3>
+  <form onSubmit={handleProfileSubmit} className="profile-form">
+    <input
+      name="name"
+      value={formData.name}
+      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+      placeholder="Имя"
+      required
+    />
+    <input
+      name="email"
+      value={formData.email}
+      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+      placeholder="Email"
+      required
+    />
+    <input
+      name="phone"
+      value={formData.phone}
+      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+      placeholder="Телефон"
+      required
+    />
+    <input
+      name="address"
+      value={formData.address}
+      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+      placeholder="Адрес"
+    />
+
+    <h4 style={{ marginTop: "20px" }}>Сменить пароль</h4>
+    <input
+      type="password"
+      value={newPassword}
+      onChange={(e) => setNewPassword(e.target.value)}
+      placeholder="Новый пароль (мин. 8 символов)"
+    />
+    {passwordError && <p className="error-text">{passwordError}</p>}
+    {saveSuccess && <p className="success-text">{saveSuccess}</p>}
+
+    <button type="submit" className="edit-profile-btn">Сохранить изменения</button>
+  </form>
+</div>
+
     </div>
   );
 };
