@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { addToast } from "../redux/toast";
-import { updateRestaurantStatus } from "../redux/restaurants";
 import "../css/styles.css";
 
 const DEFAULT_AVATAR_URL = "https://static.wixstatic.com/media/35cf67_26f8bcd18f81440a93d08a0ece05c806~mv2.jpg/v1/fit/w_502,h_282,q_90,enc_avif,quality_auto/35cf67_26f8bcd18f81440a93d08a0ece05c806~mv2.jpg";
@@ -18,6 +17,46 @@ const OwnerDashboard = () => {
   const [editAvatar, setEditAvatar] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+ 
+  // в начале компонента, после всех useState и до useEffect:
+  // Добавьте эти функции:
+  const handleSetInactive = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/restaurants/${restaurant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...restaurant, status: "inactive" }),
+      });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setRestaurant(updated);
+      dispatch(addToast({ message: "Статус изменён на Inactive", type: "success" }));
+    } catch (err) {
+      dispatch(addToast({ message: "Не удалось деактивировать ресторан", type: "error" }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetActive = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/restaurants/${restaurant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...restaurant, status: "active" }),
+      });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setRestaurant(updated);
+      dispatch(addToast({ message: "Статус изменён на Active", type: "success" }));
+    } catch (err) {
+      dispatch(addToast({ message: "Не удалось активировать ресторан", type: "error" }));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -181,19 +220,7 @@ const OwnerDashboard = () => {
     }
   };
 
-  const handleSetInactive = async () => {
-    setLoading(true);
-    try {
-      await dispatch(updateRestaurantStatus(restaurant.id, "inactive"));
-      const updatedRestaurant = { ...restaurant, status: "inactive" };
-      setRestaurant(updatedRestaurant);
-      dispatch(addToast({ message: "Restaurant set to inactive!", type: "success" }));
-    } catch (error) {
-      dispatch(addToast({ message: "Failed to set restaurant inactive.", type: "error" }));
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const updateRestaurant = async (updatedRestaurant) => {
     const res = await fetch(`http://localhost:5000/restaurants/${restaurant.id}`, {
@@ -340,15 +367,24 @@ const OwnerDashboard = () => {
                   <button onClick={() => setEditName(true)} disabled={loading}>
                     Edit Name
                   </button>
-                  {restaurant.status !== "inactive" && (
-                    <button
-                      onClick={handleSetInactive}
-                      className="delete-button"
-                      disabled={loading}
-                    >
-                      {loading ? "Setting Inactive..." : "Set Inactive"}
-                    </button>
-                  )}
+                  {restaurant.status !== "inactive" ? (
+              <button
+                onClick={handleSetInactive}
+                className="delete-button"
+                disabled={loading}
+              >
+                {loading ? "Setting Inactive..." : "Set Inactive"}
+              </button>
+            ) : (
+              <button
+                onClick={handleSetActive}
+                className="delete-button"               
+                disabled={loading}
+              >
+                {loading ? "Setting Active..." : "Set Active"}
+              </button>
+            )}
+
                 </div>
                 <p><strong>Status:</strong> {restaurant.status}</p>
               </div>

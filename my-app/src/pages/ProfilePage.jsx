@@ -28,64 +28,75 @@ const [saveSuccess, setSaveSuccess] = useState("");
 
 
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        setLoading(true);
-        const ordersRes = await fetch("http://localhost:5000/orders");
-        const ordersData = await ordersRes.json();
-        setOrders(ordersData);
+useEffect(() => {
+  const fetchProfileData = async () => {
+    try {
+      setLoading(true);
 
-        const restaurantsRes = await fetch("http://localhost:5000/restaurants");
-        const restaurantsData = await restaurantsRes.json();
-        setRestaurants(restaurantsData);
+      // Общие списки
+      const [ordersData, restaurantsData, ownersData] = await Promise.all([
+        fetch("http://localhost:5000/orders").then((r) => r.ok ? r.json() : []),
+        fetch("http://localhost:5000/restaurants").then((r) => r.ok ? r.json() : []),
+        fetch("http://localhost:5000/restaurant_owners").then((r) => r.ok ? r.json() : []),
+      ]);
+      setOrders(ordersData);
+      setRestaurants(restaurantsData);
+      setRestaurantOwners(ownersData);
 
-        const ownersRes = await fetch("http://localhost:5000/restaurant_owners");
-        const ownersData = await ownersRes.json();
-        setRestaurantOwners(ownersData);
+      // Профиль пользователя
+      const profileRes = await fetch(
+        `http://localhost:5000/user_profiles?user_id=${user.id}`
+      );
+      const profileJson = profileRes.ok ? await profileRes.json() : [];
+      const profile = profileJson[0] || {};
+      setProfileData(profile);
 
-        const profileRes = await fetch(`http://localhost:5000/user_profiles?user_id=${user.id}`);
-        const profileData = await profileRes.json();
-        setProfileData(profileData[0] || {});
+      setFormData({
+        name:  user.name  || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: profile.address || "",
+      });
 
-        setFormData({
-          name: user.name || "",
-          email: user.email || "",
-          phone: user.phone || "",
-          address: profileData[0]?.address || "",
-        });
-        
-
-        if (user.role === "courier") {
-          const courierRes = await fetch(`http://localhost:5000/couriers?user_id=${user.id}`);
-          const courierData = await courierRes.json();
-          setRoleSpecificData(courierData[0] || {});
-          dispatch(fetchReviews({ courierId: user.id }));
-        } else if (user.role === "owner") {
-          const ownerRes = await fetch(`http://localhost:5000/restaurant_owners?user_id=${user.id}`);
-          const ownerData = await ownerRes.json();
-          setRoleSpecificData(ownerData[0] || {});
-        } else if (user.role === "moderator") {
-          const modRes = await fetch(`http://localhost:5000/moderators?user_id=${user.id}`);
-          const modData = await modRes.json();
-          setRoleSpecificData(modData[0] || {});
-        } else if (user.role === "admin") {
-          const adminRes = await fetch(`http://localhost:5000/admins?user_id=${user.id}`);
-          const adminData = await adminRes.json();
-          setRoleSpecificData(adminData[0] || {});
-        }
-      } catch (err) {
-        console.error("Error fetching profile data:", err);
-        setError("Failed to load profile data. Please try again later.");
-      } finally {
-        setLoading(false);
+      // Роль-специфичные данные
+      if (user.role === "courier") {
+        const courierRes = await fetch(
+          `http://localhost:5000/couriers?user_id=${user.id}`
+        );
+        const courierJson = courierRes.ok ? await courierRes.json() : [];
+        setRoleSpecificData(courierJson[0] || {});
+        dispatch(fetchReviews({ courierId: user.id }));
+      } else if (user.role === "owner") {
+        const ownerRes = await fetch(
+          `http://localhost:5000/restaurant_owners?user_id=${user.id}`
+        );
+        const ownerJson = ownerRes.ok ? await ownerRes.json() : [];
+        setRoleSpecificData(ownerJson[0] || {});
+      } else if (user.role === "moderator") {
+        const modRes = await fetch(
+          `http://localhost:5000/moderators?user_id=${user.id}`
+        );
+        const modJson = modRes.ok ? await modRes.json() : [];
+        setRoleSpecificData(modJson[0] || {});
+      } else if (user.role === "admin") {
+        const adminRes = await fetch(
+          `http://localhost:5000/admins?user_id=${user.id}`
+        );
+        const adminJson = adminRes.ok ? await adminRes.json() : [];
+        setRoleSpecificData(adminJson[0] || {});
       }
-    };
 
-    if (user) {
-      fetchProfileData();
+    } catch (err) {
+      console.error("Error fetching profile data:", err);
+      setError("Failed to load profile data. Please try again later.");
+    } finally {
+      setLoading(false);
     }
-  }, [user, dispatch]);
+  };
+
+  if (user) fetchProfileData();
+}, [user, dispatch]);
+
 
   const handleProfileSubmit = async (e) => {
   e.preventDefault();

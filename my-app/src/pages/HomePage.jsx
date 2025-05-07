@@ -15,7 +15,7 @@ const HomePage = () => {
     if (!list.length) dispatch(fetchRestaurants());
   }, [dispatch, list.length]);
 
-  const previews = list.slice(0, 6);     // first 6 restaurants
+  const previews = list.slice(0, 8);     // first 6 restaurants
 
   return (
     <div className="hp-wrapper">

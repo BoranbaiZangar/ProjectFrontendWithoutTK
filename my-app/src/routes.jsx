@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ConsoleRoleChanger from "./components/ConsoleRoleChanger";
 import CheckoutPage from "./pages/CheckoutPage";
+import SearchResults from "./pages/SearchResults";
 
 export default function AppRoutes() {
   return (
@@ -84,6 +85,7 @@ export default function AppRoutes() {
           }
         />
         <Route path="*" element={<NotFound />} />
+        <Route path="/search" element={<SearchResults />} />
       </Routes>
     </>
   );
