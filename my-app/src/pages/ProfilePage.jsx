@@ -44,12 +44,30 @@ useEffect(() => {
       setRestaurantOwners(ownersData);
 
       // Профиль пользователя
-      const profileRes = await fetch(
-        `http://localhost:5000/user_profiles?user_id=${user.id}`
-      );
-      const profileJson = profileRes.ok ? await profileRes.json() : [];
-      const profile = profileJson[0] || {};
-      setProfileData(profile);
+      let profile;
+const profileRes = await fetch(`http://localhost:5000/user_profiles?user_id=${user.id}`);
+if (profileRes.ok) {
+  const profileJson = await profileRes.json();
+  if (profileJson.length > 0) {
+    profile = profileJson[0];
+  } else {
+    // Профиль не найден — создаём
+    const createRes = await fetch(`http://localhost:5000/user_profiles`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user.id,
+        avatar_url: "",
+        address: ""
+      }),
+    });
+    profile = await createRes.json();
+  }
+  setProfileData(profile);
+} else {
+  throw new Error("Ошибка загрузки профиля");
+}
+
 
       setFormData({
         name:  user.name  || "",
@@ -73,11 +91,8 @@ useEffect(() => {
         const ownerJson = ownerRes.ok ? await ownerRes.json() : [];
         setRoleSpecificData(ownerJson[0] || {});
       } else if (user.role === "moderator") {
-        const modRes = await fetch(
-          `http://localhost:5000/moderators?user_id=${user.id}`
-        );
-        const modJson = modRes.ok ? await modRes.json() : [];
-        setRoleSpecificData(modJson[0] || {});
+        // Модератор — это обычный пользователь с role === "moderator"
+        setRoleSpecificData({ role: "moderator" }); // можно вообще убрать
       } else if (user.role === "admin") {
         const adminRes = await fetch(
           `http://localhost:5000/admins?user_id=${user.id}`
