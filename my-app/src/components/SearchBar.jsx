@@ -11,6 +11,7 @@ export default function SearchBar() {
     const q = query.trim();
     if (!q) return;
     navigate(`/search?query=${encodeURIComponent(q)}`);
+    setQuery("");
   };
 
   return (
