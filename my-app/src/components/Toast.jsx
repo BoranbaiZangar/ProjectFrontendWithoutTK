@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeToast } from "../redux/toast";
-import "./Toast.css";
+import "../css/Toast.css";
 
 const Toast = () => {
   const toasts = useSelector((state) => state.toasts);

@@ -9,6 +9,7 @@ import {
   fetchReviews,
 } from "../redux/orders";
 import { fetchCouriers } from "../redux/couriers";
+import ConfirmModal from "../components/ConfirmModal";
 
 const OrdersPage = () => {
   const dispatch = useDispatch();
@@ -19,6 +20,8 @@ const OrdersPage = () => {
     useSelector((state) => state.couriers || {});
   const [reviewData, setReviewData] = useState({});
   const [showReviewForm, setShowReviewForm] = useState({});
+  const [showCancelModal, setShowCancelModal] = useState({});
+  const [cancelOrderId, setCancelOrderId] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -29,11 +32,23 @@ const OrdersPage = () => {
     }
   }, [dispatch, user]);
 
-  const handleAssignCourier = (orderId, courierId) => {
-    if (courierId) {
-      dispatch(assignCourier(orderId, courierId));
+  const handleAssignCourier = (orderId, order) => {
+    if (!order.courier_id) {
+      dispatch({
+        type: "toast/ADD_TOAST",
+        payload: {
+          message: "Please select a courier before assigning.",
+          type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        },
+      });
+      return;
     }
+  
+    dispatch(assignCourier(orderId, order.courier_id));
   };
+  
 
   const handleConfirmOrder = (orderId) => {
     dispatch(updateOrderStatus(orderId, "In Transit"));
@@ -44,14 +59,27 @@ const OrdersPage = () => {
   };
 
   const handleCancelOrder = (orderId) => {
-    if (window.confirm("Are you sure you want to cancel this order?")) {
-      dispatch(cancelOrder(orderId));
+    setShowCancelModal((prev) => ({ ...prev, [orderId]: true }));
+    setCancelOrderId(orderId);
+  };
+
+  const confirmCancelOrder = () => {
+    if (cancelOrderId) {
+      dispatch(cancelOrder(cancelOrderId));
+      setShowCancelModal((prev) => ({ ...prev, [cancelOrderId]: false }));
+      setCancelOrderId(null);
     }
   };
 
   const handleSubmitReview = (orderId, order) => {
     const data = reviewData[orderId];
-    if (!data || data.courierRating < 1 || data.courierRating > 5 || data.restaurantRating < 1 || data.restaurantRating > 5) {
+    if (
+      !data ||
+      data.courierRating < 1 ||
+      data.courierRating > 5 ||
+      data.restaurantRating < 1 ||
+      data.restaurantRating > 5
+    ) {
       dispatch({
         type: "toast/ADD_TOAST",
         payload: { message: "Ratings must be between 1 and 5.", type: "error" },
@@ -62,7 +90,10 @@ const OrdersPage = () => {
     if (!order.restaurant_id) {
       dispatch({
         type: "toast/ADD_TOAST",
-        payload: { message: "Cannot submit review: Restaurant ID is missing for this order.", type: "error" },
+        payload: {
+          message: "Cannot submit review: Restaurant ID is missing for this order.",
+          type: "error",
+        },
       });
       return;
     }
@@ -79,7 +110,10 @@ const OrdersPage = () => {
       })
     ).then(() => {
       setShowReviewForm((prev) => ({ ...prev, [orderId]: false }));
-      setReviewData((prev) => ({ ...prev, [orderId]: { courierRating: 0, restaurantRating: 0, restaurantComment: "" } }));
+      setReviewData((prev) => ({
+        ...prev,
+        [orderId]: { courierRating: 0, restaurantRating: 0, restaurantComment: "" },
+      }));
       dispatch(fetchReviews({}));
     });
   };
@@ -105,8 +139,8 @@ const OrdersPage = () => {
     ? user.role === "courier"
       ? orders.filter((order) => order.courier_id === user.id)
       : user.role === "user"
-        ? orders.filter((order) => order.user_id === user.id)
-        : orders
+      ? orders.filter((order) => order.user_id === user.id)
+      : orders
     : [];
 
   return (
@@ -134,7 +168,9 @@ const OrdersPage = () => {
           <strong>Order #{order.id}</strong>
           <ul>
             {order.items?.map((item, index) => (
-              <li key={index}>{item.name} — ₸{item.price}</li>
+              <li key={index}>
+                {item.name} — ₸{item.price}
+              </li>
             ))}
           </ul>
           <p style={{ color: statusColors[order.status] || "#000", fontWeight: "bold" }}>
@@ -286,6 +322,17 @@ const OrdersPage = () => {
                 </div>
               )}
             </div>
+          )}
+
+          {showCancelModal[order.id] && (
+            <ConfirmModal
+              message="Are you sure you want to cancel this order?"
+              onConfirm={confirmCancelOrder}
+              onCancel={() => {
+                setShowCancelModal((prev) => ({ ...prev, [order.id]: false }));
+                setCancelOrderId(null);
+              }}
+            />
           )}
         </div>
       ))}

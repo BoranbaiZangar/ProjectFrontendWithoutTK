@@ -1,0 +1,53 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-width: 100vw;
+    min-height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Высокий z-index для перекрытия других элементов */
+  }
+  
+  .modal-content {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+  }
+  
+  .modal-message {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 1.1rem;
+    color: #1A1A1A;
+    margin-bottom: 1.5rem;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .modal-confirm {
+    background-color: #6B1E3A; /* Бордовый из styles.css */
+  }
+  
+  .modal-confirm:hover {
+    background-color: #C0A062; /* Золотой при наведении */
+  }
+  
+  .modal-cancel {
+    background-color: #D3D3D3; /* Серый для отмены */
+  }
+  
+  .modal-cancel:hover {
+    background-color: #C0A062; /* Золотой при наведении */
+  }

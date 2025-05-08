@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import AppRoutes from "./routes";
 import Toast from "./components/Toast";
 
+
 function App() {
   return (
     <Provider store={store}>

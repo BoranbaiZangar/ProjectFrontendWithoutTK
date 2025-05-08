@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ConsoleRoleChanger from "./components/ConsoleRoleChanger";
 import CheckoutPage from "./pages/CheckoutPage";
+import SearchResults from "./pages/SearchResults";
 
 export default function AppRoutes() {
   return (
@@ -24,13 +25,21 @@ export default function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/restaurants" element={<RestaurantsPage />} />
+        {/* < element={} /> */}
         <Route path="/restaurants/:id" element={<RestaurantDetail />} />
         <Route
           path="/profile"
           element={
             <ProtectedRoute roles={["user", "admin", "moderator", "owner", "courier"]}>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+         path="/restaurants"
+          element={
+            <ProtectedRoute roles={["user", "admin", "moderator"]}>
+      <RestaurantsPage />
             </ProtectedRoute>
           }
         />
@@ -43,13 +52,13 @@ export default function AppRoutes() {
           }
         />
         <Route
-  path="/checkout"
-  element={
-    <ProtectedRoute roles={["user"]}>
-      <CheckoutPage />
-    </ProtectedRoute>
-  }
-/>
+          path="/checkout"
+          element={
+            <ProtectedRoute roles={["user"]}>
+              <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/orders"
@@ -84,6 +93,7 @@ export default function AppRoutes() {
           }
         />
         <Route path="*" element={<NotFound />} />
+        <Route path="/search" element={<SearchResults />} />
       </Routes>
     </>
   );

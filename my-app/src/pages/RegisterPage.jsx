@@ -80,14 +80,20 @@ const RegisterPage = () => {
           type="email"
           required
         />
-        <input
+      <input
           name="phone"
           value={form.phone}
-          onChange={handleChange}
+          onChange={(e) => {
+            const value = e.target.value;
+            // Убираем все нецифровые символы
+            const numericValue = value.replace(/[^0-9]/g, '');
+            handleChange({ target: { name: 'phone', value: numericValue } });
+          }}
           placeholder="Phone"
           type="tel"
           required
         />
+
         <input
           name="password"
           type="password"

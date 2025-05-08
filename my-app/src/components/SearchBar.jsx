@@ -1,30 +1,30 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
-import "../css/styles.css"; // make sure your styles include .search-bar, .search-input, .search-btn
+import { useNavigate } from "react-router-dom";
+import "../css/styles.css";
 
-export default function SearchBar({ onSearch }) {
+export default function SearchBar() {
   const [query, setQuery] = useState("");
+  const navigate = useNavigate();
 
-  const handleClick = () => {
-    if (onSearch) onSearch(query);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    navigate(`/search?query=${encodeURIComponent(q)}`);
   };
 
   return (
-    <div className="search-bar">
+    <form onSubmit={handleSearch} className="search-bar">
       <input
         type="text"
-        className="search-input"
         placeholder="Search for restaurant, dish or item"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        className="search-input"
       />
-      <button className="search-btn" onClick={handleClick}>
+      <button type="submit" className="search-btn">
         Find
       </button>
-    </div>
+    </form>
   );
 }
-
-SearchBar.propTypes = {
-  onSearch: PropTypes.func,
-};

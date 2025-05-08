@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import md5 from "md5";
 import { fetchReviews } from "../redux/orders";
+import { addToast } from "../redux/toast";
+import ImageUploader from "../components/ImageUploader";
+import ConfirmModal from "../components/ConfirmModal";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -13,48 +16,70 @@ const ProfilePage = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [restaurantOwners, setRestaurantOwners] = useState([]);
   const [newPassword, setNewPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [avatarReset, setAvatarReset] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", address: "" });
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         setLoading(true);
-        const ordersRes = await fetch("http://localhost:5000/orders");
-        const ordersData = await ordersRes.json();
+
+        const [ordersData, restaurantsData, ownersData] = await Promise.all([
+          fetch("http://localhost:5000/orders").then((r) => (r.ok ? r.json() : [])),
+          fetch("http://localhost:5000/restaurants").then((r) => (r.ok ? r.json() : [])),
+          fetch("http://localhost:5000/restaurant_owners").then((r) => (r.ok ? r.json() : [])),
+        ]);
         setOrders(ordersData);
-
-        const restaurantsRes = await fetch("http://localhost:5000/restaurants");
-        const restaurantsData = await restaurantsRes.json();
         setRestaurants(restaurantsData);
-
-        const ownersRes = await fetch("http://localhost:5000/restaurant_owners");
-        const ownersData = await ownersRes.json();
         setRestaurantOwners(ownersData);
 
         const profileRes = await fetch(`http://localhost:5000/user_profiles?user_id=${user.id}`);
-        const profileData = await profileRes.json();
-        setProfileData(profileData[0] || {});
+        const profileJson = profileRes.ok ? await profileRes.json() : [];
+        let profile = profileJson[0] || null;
+
+        // If profile doesn't exist, create a new one
+        if (!profile) {
+          const newProfileRes = await fetch("http://localhost:5000/user_profiles", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: user.id, address: "", avatar_url: "" }),
+          });
+          if (newProfileRes.ok) {
+            profile = await newProfileRes.json();
+          } else {
+            throw new Error("Failed to create user profile.");
+          }
+        }
+
+        setProfileData(profile);
+
+        setFormData({
+          name: user.name || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          address: profile.address || "",
+        });
 
         if (user.role === "courier") {
           const courierRes = await fetch(`http://localhost:5000/couriers?user_id=${user.id}`);
-          const courierData = await courierRes.json();
-          setRoleSpecificData(courierData[0] || {});
+          const courierJson = courierRes.ok ? await courierRes.json() : [];
+          setRoleSpecificData(courierJson[0] || {});
           dispatch(fetchReviews({ courierId: user.id }));
         } else if (user.role === "owner") {
           const ownerRes = await fetch(`http://localhost:5000/restaurant_owners?user_id=${user.id}`);
-          const ownerData = await ownerRes.json();
-          setRoleSpecificData(ownerData[0] || {});
+          const ownerJson = ownerRes.ok ? await ownerRes.json() : [];
+          setRoleSpecificData(ownerJson[0] || {});
         } else if (user.role === "moderator") {
           const modRes = await fetch(`http://localhost:5000/moderators?user_id=${user.id}`);
-          const modData = await modRes.json();
-          setRoleSpecificData(modData[0] || {});
+          const modJson = modRes.ok ? await modRes.json() : [];
+          setRoleSpecificData(modJson[0] || {});
         } else if (user.role === "admin") {
           const adminRes = await fetch(`http://localhost:5000/admins?user_id=${user.id}`);
-          const adminData = await adminRes.json();
-          setRoleSpecificData(adminData[0] || {});
+          const adminJson = adminRes.ok ? await adminRes.json() : [];
+          setRoleSpecificData(adminJson[0] || {});
         }
       } catch (err) {
         console.error("Error fetching profile data:", err);
@@ -64,50 +89,202 @@ const ProfilePage = () => {
       }
     };
 
-    if (user) {
-      fetchProfileData();
-    }
+    if (user) fetchProfileData();
   }, [user, dispatch]);
 
-  const handlePasswordChange = async (e) => {
+  const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
+    setShowConfirm(true);
+  };
 
-    if (newPassword.length < 8) {
-      setPasswordError("Password must be at least 8 characters long.");
+  const confirmSave = async () => {
+    setShowConfirm(false);
+
+    if (newPassword && newPassword.length < 8) {
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: "Password must be at least 8 characters long.",
+          type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
       return;
     }
 
     try {
-      const hashedPassword = md5(newPassword);
-      const res = await fetch(`http://localhost:5000/users/${user.id}`, {
+      await fetch(`http://localhost:5000/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: hashedPassword }),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          ...(newPassword && { password: md5(newPassword) }),
+        }),
       });
 
-      if (res.ok) {
-        setPasswordSuccess("Password updated successfully!");
-        setNewPassword("");
-      } else {
-        setPasswordError("Failed to update password.");
-      }
+      await fetch(`http://localhost:5000/user_profiles/${profileData.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: formData.address }),
+      });
+
+      setProfileData((prev) => ({ ...prev, address: formData.address }));
+      setFormData((prev) => ({
+        ...prev,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+      }));
+      dispatch({
+        type: "auth/UPDATE_USER",
+        payload: {
+          ...user,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+        },
+      });
+
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: "Profile updated successfully!",
+          type: "success",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
+      setNewPassword("");
     } catch (err) {
-      setPasswordError("An error occurred while updating the password.");
+      console.error("Error updating profile:", err);
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: "An error occurred while updating the profile.",
+          type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
+    }
+  };
+
+  const handleAvatarUpload = async (base64Image) => {
+    if (!profileData || !profileData.id) {
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: "Profile not found. Please try again later.",
+          type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/user_profiles/${profileData.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: base64Image }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to update avatar: ${res.statusText}`);
+      }
+
+      // Update profileData
+      setProfileData((prev) => ({ ...prev, avatar_url: base64Image }));
+      setAvatarReset(false);
+
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: "Avatar uploaded successfully!",
+          type: "success",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
+    } catch (err) {
+      console.error("Error updating avatar:", err);
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: `Failed to update avatar: ${err.message}`,
+          type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
+    }
+  };
+
+  const handleAvatarDelete = async () => {
+    if (!profileData || !profileData.id) {
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: "Profile not found. Please try again later.",
+          type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/user_profiles/${profileData.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: "" }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to delete avatar: ${res.statusText}`);
+      }
+
+      setProfileData((prev) => ({ ...prev, avatar_url: "" }));
+      setAvatarReset(true);
+
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: "Avatar deleted successfully!",
+          type: "success",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
+    } catch (err) {
+      console.error("Error deleting avatar:", err);
+      dispatch(
+        addToast({
+          id: Date.now(),
+          message: `Failed to delete avatar: ${err.message}`,
+          type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        })
+      );
     }
   };
 
   if (!user) {
-    return <div style={{ padding: "20px" }}>Please log in to view your profile.</div>;
+    return <div className="loading">Please log in to view your profile.</div>;
   }
 
   if (loading) {
-    return <div style={{ padding: "20px" }}>Loading...</div>;
+    return <div className="loading">Loading...</div>;
   }
 
   if (error) {
-    return <div style={{ padding: "20px", color: "red" }}>{error}</div>;
+    return <div className="error">{error}</div>;
   }
 
   const calculateTotalPrice = (items) => {
@@ -150,7 +327,7 @@ const ProfilePage = () => {
 
   const getAverageOrdersPerDay = (orders, userId) => {
     const userOrders = orders.filter((order) => order.courier_id === userId && order.status === "Delivered");
-    return userOrders.length; // Возвращаем общее количество доставленных заказов, так как created_at недоступен
+    return userOrders.length;
   };
 
   const getCourierAverageRating = () => {
@@ -166,7 +343,7 @@ const ProfilePage = () => {
       const favoriteRestaurant = getFavoriteRestaurant(orders, user.id);
 
       return (
-        <div style={{ marginBottom: "20px" }}>
+        <div className="profile-section">
           <h3>User Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
@@ -194,12 +371,12 @@ const ProfilePage = () => {
     }
 
     if (user.role === "courier") {
-      const { totalOrders, recentOrders } = getOrdersStats(orders, user.id, "courier");
+      const { recentOrders } = getOrdersStats(orders, user.id, "courier");
       const totalDeliveries = getAverageOrdersPerDay(orders, user.id);
       const averageRating = getCourierAverageRating();
 
       return (
-        <div style={{ marginBottom: "20px" }}>
+        <div className="profile-section">
           <h3>Courier Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Phone:</strong> {user.phone}</p>
@@ -241,7 +418,7 @@ const ProfilePage = () => {
         .slice(0, 3);
 
       return (
-        <div style={{ marginBottom: "20px" }}>
+        <div className="profile-section">
           <h3>Restaurant Owner Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
@@ -292,34 +469,35 @@ const ProfilePage = () => {
 
     if (user.role === "moderator") {
       return (
-        <div style={{ marginBottom: "20px" }}>
+        <div className="profile-section">
           <h3>Moderator Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Moderator Since:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
-          <p><strong>Couriers Approved:</strong> 5 (Placeholder)</p>
-          <p><strong>Couriers Rejected/Removed:</strong> 2 (Placeholder)</p>
-          <p><strong>Last Activity:</strong> Approved courier #1234 on {new Date().toLocaleDateString()} (Placeholder)</p>
         </div>
       );
     }
 
     if (user.role === "admin") {
-      const activeUsersToday = [...new Set(orders.map((order) => order.user_id || order.userId))].length;
-      const ordersToday = orders.length;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const ordersToday = orders.filter((order) => {
+        const orderDate = new Date(order.created_at);
+        return orderDate >= today;
+      });
+      const activeUsersToday = [...new Set(ordersToday.map((order) => order.user_id || order.userId))].length;
+      const totalOrdersToday = ordersToday.length;
 
       return (
-        <div style={{ marginBottom: "20px" }}>
+        <div className="profile-section">
           <h3>Admin Profile</h3>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Phone:</strong> {user.phone}</p>
           <p><strong>Admin Since:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
-          <p><strong>Users Blocked:</strong> 3 (Placeholder)</p>
-          <p><strong>Restaurants Approved/Banned:</strong> 10 / 1 (Placeholder)</p>
+          <h4>Platform Statistics (Today)</h4>
           <p><strong>Active Users:</strong> {activeUsersToday}</p>
-          <p><strong>Total Orders on Platform:</strong> {ordersToday}</p>
-          <p><strong>Last Actions:</strong> Banned user #42 on {new Date().toLocaleDateString()} (Placeholder)</p>
+          <p><strong>Total Orders:</strong> {totalOrdersToday}</p>
         </div>
       );
     }
@@ -328,12 +506,13 @@ const ProfilePage = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <div style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
+    <div className="profile-container">
+      <div className="profile-header">
         <img
-          src={profileData?.avatar_url || "https://via.placeholder.com/100"}
+          key={profileData?.avatar_url || "default"}
+          src={profileData?.avatar_url || "/default-avatar.png"}
           alt="Profile"
-          style={{ width: "100px", height: "100px", borderRadius: "50%", marginRight: "20px" }}
+          className="profile-avatar"
         />
         <div>
           <h2>{user.name}'s Profile</h2>
@@ -343,24 +522,87 @@ const ProfilePage = () => {
 
       {renderProfile()}
 
-      <div>
+      <div className="button-group">
+        <ImageUploader onUpload={handleAvatarUpload} reset={avatarReset} />
+        {profileData?.avatar_url && (
+          <button className="edit-profile-btn" onClick={handleAvatarDelete}>
+            Delete Avatar
+          </button>
+        )}
+      </div>
+
+      <div className="profile-section">
         <h3>Account Settings</h3>
-        <button style={{ padding: "5px 10px", marginBottom: "10px" }}>Edit Profile</button>
-        <form onSubmit={handlePasswordChange}>
+        <form onSubmit={handleProfileSubmit} className="profile-form">
+          <div className="input-wrapper">
+            <input
+              name="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Name"
+              required
+            />
+            <label>Name</label>
+          </div>
+          <div className="input-wrapper">
+            <input
+              name="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="Email"
+              required
+            />
+            <label>Email</label>
+          </div>
+          <div className="input-wrapper">
+            <input
+              name="phone"
+              value={formData.phone}
+              onChange={(e) => {
+                const value = e.target.value;
+                const numericValue = value.replace(/[^0-9]/g, "");
+                setFormData({ ...formData, phone: numericValue });
+              }}
+              placeholder="Phone"
+              type="tel"
+              required
+            />
+            <label>Phone</label>
+          </div>
+          <div className="input-wrapper">
+            <input
+              name="address"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              placeholder="Address"
+            />
+            <label>Address</label>
+          </div>
+
           <h4>Change Password</h4>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="New Password (min 8 characters)"
-            required
-            style={{ padding: "5px", marginBottom: "10px", width: "200px" }}
-          />
-          {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
-          {passwordSuccess && <p style={{ color: "green" }}>{passwordSuccess}</p>}
-          <button type="submit" style={{ padding: "5px 10px" }}>Update Password</button>
+          <div className="input-wrapper">
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="New Password (min. 8 characters)"
+            />
+            <label>New Password</label>
+          </div>
+
+          <button type="submit" className="edit-profile-btn">
+            Save Changes
+          </button>
         </form>
       </div>
+
+      {showConfirm && (
+        <ConfirmModal
+          message="Are you sure you want to save the changes?"
+          onConfirm={confirmSave}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
     </div>
   );
 };

@@ -5,8 +5,7 @@ import "../css/homepage.css";
 const RestaurantPreviewCard = ({ restaurant }) => {
   // выбираем изображение в порядке приоритета
   const img =
-    restaurant.avatar_url ||          // новое поле
-    restaurant.photo ||               // старое поле (если вдруг сохранится)
+    restaurant.avatar_url ||           // старое поле (если вдруг сохранится)
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEMIbANrmSyaJulwOUgIC4Ewj294UUHZB5ZQ&s";               // запасная заглушка
 
   return (

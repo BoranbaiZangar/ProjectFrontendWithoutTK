@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { addToast } from "../redux/toast";
-import { updateRestaurantStatus } from "../redux/restaurants";
 import "../css/styles.css";
 
 const DEFAULT_AVATAR_URL = "https://static.wixstatic.com/media/35cf67_26f8bcd18f81440a93d08a0ece05c806~mv2.jpg/v1/fit/w_502,h_282,q_90,enc_avif,quality_auto/35cf67_26f8bcd18f81440a93d08a0ece05c806~mv2.jpg";
@@ -18,6 +17,44 @@ const OwnerDashboard = () => {
   const [editAvatar, setEditAvatar] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+
+  const handleSetInactive = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/restaurants/${restaurant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...restaurant, status: "inactive" }),
+      });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setRestaurant(updated);
+      dispatch(addToast({ message: "Status changed to Inactive", type: "success" }));
+    } catch (err) {
+      dispatch(addToast({ message: "Failed to deactivate restaurant", type: "error" }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetActive = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/restaurants/${restaurant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...restaurant, status: "active" }),
+      });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setRestaurant(updated);
+      dispatch(addToast({ message: "Status changed to Active", type: "success" }));
+    } catch (err) {
+      dispatch(addToast({ message: "Failed to activate restaurant", type: "error" }));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -181,20 +218,6 @@ const OwnerDashboard = () => {
     }
   };
 
-  const handleSetInactive = async () => {
-    setLoading(true);
-    try {
-      await dispatch(updateRestaurantStatus(restaurant.id, "inactive"));
-      const updatedRestaurant = { ...restaurant, status: "inactive" };
-      setRestaurant(updatedRestaurant);
-      dispatch(addToast({ message: "Restaurant set to inactive!", type: "success" }));
-    } catch (error) {
-      dispatch(addToast({ message: "Failed to set restaurant inactive.", type: "error" }));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const updateRestaurant = async (updatedRestaurant) => {
     const res = await fetch(`http://localhost:5000/restaurants/${restaurant.id}`, {
       method: "PUT",
@@ -256,7 +279,6 @@ const OwnerDashboard = () => {
         </form>
       ) : (
         <>
-          {/* Аватар ресторана */}
           <div className="restaurant-section">
             {editAvatar ? (
               <form onSubmit={handleSubmit}>
@@ -302,7 +324,6 @@ const OwnerDashboard = () => {
             )}
           </div>
 
-          {/* Название ресторана */}
           <div className="restaurant-section">
             {editName ? (
               <form onSubmit={handleSubmit}>
@@ -340,13 +361,21 @@ const OwnerDashboard = () => {
                   <button onClick={() => setEditName(true)} disabled={loading}>
                     Edit Name
                   </button>
-                  {restaurant.status !== "inactive" && (
+                  {restaurant.status !== "inactive" ? (
                     <button
                       onClick={handleSetInactive}
                       className="delete-button"
                       disabled={loading}
                     >
                       {loading ? "Setting Inactive..." : "Set Inactive"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSetActive}
+                      className="delete-button"
+                      disabled={loading}
+                    >
+                      {loading ? "Setting Active..." : "Set Active"}
                     </button>
                   )}
                 </div>
@@ -355,7 +384,6 @@ const OwnerDashboard = () => {
             )}
           </div>
 
-          {/* Адрес ресторана */}
           <div className="restaurant-section">
             {editAddress ? (
               <form onSubmit={handleSubmit}>
@@ -396,7 +424,6 @@ const OwnerDashboard = () => {
             )}
           </div>
 
-          {/* Описание ресторана */}
           <div className="restaurant-section">
             {editDescription ? (
               <div className="input-wrapper">
@@ -434,7 +461,6 @@ const OwnerDashboard = () => {
             )}
           </div>
 
-          {/* Блюда */}
           <div className="restaurant-section">
             <h3>Dishes</h3>
             <ul className="dishes-list">
