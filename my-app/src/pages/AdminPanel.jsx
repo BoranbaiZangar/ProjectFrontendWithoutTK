@@ -1,78 +1,74 @@
 import React, { useEffect, useState } from "react";
 import ConfirmModal from "../components/ConfirmModal";
+import "../css/AdminPanel.css";
 
-// Компонент AdminPanel: қолданушыларды басқаруға арналған
 const AdminPanel = () => {
-  // Қолданушылар тізімін сақтауға арналған күй
   const [users, setUsers] = useState([]);
-  // Растау модалын көрсету/жасыру күйі
   const [showConfirm, setShowConfirm] = useState(false);
-  // Бан/разбан істейтін қолданушының ID-ін сақтауға арналған күй
   const [selectedUserId, setSelectedUserId] = useState(null);
-  // Бан немесе разбан әрекетін анықтауға арналған күй (true - бан, false - разбан)
   const [isBanning, setIsBanning] = useState(true);
-  // Қолданушы рөлдерінің тізімі
   const roles = ["user", "owner", "admin", "courier", "moderator"];
 
-  // Серверден қолданушыларды алу функциясы
   const fetchUsers = async () => {
-    const res = await fetch("http://localhost:5000/users");
-    const data = await res.json();
-    setUsers(data);
+    try {
+      const res = await fetch("http://localhost:5000/users");
+      if (!res.ok) throw new Error("Failed to fetch users");
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      console.error("Error fetching users:", err.message);
+    }
   };
 
-  // Компонент жүктелгенде қолданушыларды аламыз
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Қолданушы рөлін өзгерту функциясы
   const handleRoleChange = async (userId, newRole) => {
-    const user = users.find((u) => u.id === userId);
-    const updatedUser = { ...user, role: newRole };
+    try {
+      const user = users.find((u) => u.id === userId);
+      const updatedUser = { ...user, role: newRole };
 
-    await fetch(`http://localhost:5000/users/${userId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedUser),
-    });
+      const res = await fetch(`http://localhost:5000/users/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedUser),
+      });
 
-    fetchUsers();
+      if (!res.ok) throw new Error("Failed to update role");
+      fetchUsers();
+    } catch (err) {
+      console.error("Error updating role:", err.message);
+    }
   };
 
-  // Бан/разбан растау модалын көрсету функциясы
   const confirmBanUnban = (userId, actionIsBan) => {
     setSelectedUserId(userId);
     setIsBanning(actionIsBan);
     setShowConfirm(true);
   };
 
-  // Қолданушыны бан/разбан ету функциясы
   const handleBanUnbanConfirmed = async () => {
     try {
-      // Бан/разбан істейтін қолданушыны аламыз
       const userToUpdate = users.find((u) => u.id === selectedUserId);
-      if (!userToUpdate) {
-        throw new Error("User not found");
-      }
+      if (!userToUpdate) throw new Error("User not found");
 
-      // Жаңа статус: "banned" немесе "active"
       const newStatus = isBanning ? "banned" : "active";
       const updatedUser = { ...userToUpdate, status: newStatus };
 
-      // Қолданушы статусын жаңарту
-      await fetch(`http://localhost:5000/users/${selectedUserId}`, {
+      const res = await fetch(`http://localhost:5000/users/${selectedUserId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedUser),
       });
 
-      // Модальді жабамыз және күйді жаңартамыз
+      if (!res.ok) throw new Error("Failed to update status");
+
       setShowConfirm(false);
       setSelectedUserId(null);
       fetchUsers();
     } catch (err) {
-      console.error("Қолданушыны бан/разбан кезінде қате пайда болды:", err.message);
+      console.error("Error during ban/unban:", err.message);
       setShowConfirm(false);
       setSelectedUserId(null);
     }
@@ -102,8 +98,16 @@ const AdminPanel = () => {
                 <td>{u.id}</td>
                 <td>{u.name}</td>
                 <td>{u.email}</td>
-                <td>{u.role}</td>
-                <td>{u.status}</td>
+                <td>
+                  <span className={`role-badge role-${u.role.toLowerCase()}`}>
+                    {u.role}
+                  </span>
+                </td>
+                <td>
+                  <span className={`status-badge status-${u.status.toLowerCase()}`}>
+                    {u.status}
+                  </span>
+                </td>
                 <td>
                   <select
                     value={u.role}

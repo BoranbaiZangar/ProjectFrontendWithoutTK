@@ -10,15 +10,6 @@ export default function DishCard(props) {
   const restaurantId = props.restaurantId;
 
   function handleAddToCart() {
-    if (!user) {
-      alert("Please log in to add items to cart.");
-      return;
-    }
-    if (user.role !== "user") {
-      alert("Only users can add items to cart.");
-      return;
-    }
-
     dispatch(
       addToCart({ id, name, price, restaurantId })
     );
@@ -31,7 +22,9 @@ export default function DishCard(props) {
     <div style={{ border: "1px solid #ddd", borderRadius: 10, padding: 16, marginBottom: 16, background: "#fff" }}>
       <h4>{name}</h4>
       <p>Price: ₸{price}</p>
-      <button onClick={handleAddToCart}>Add to Cart</button>
+      {user && user.role === "user" && (
+        <button onClick={handleAddToCart}>Add to Cart</button>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { register } from "../redux/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Import Link
 import md5 from "md5";
 import { addToast } from "../redux/toast";
 
@@ -23,13 +23,11 @@ const RegisterPage = () => {
   };
 
   const validateForm = () => {
-    // Проверка email на наличие @
     if (!form.email.includes("@")) {
       dispatch(addToast({ message: "Email must contain '@' symbol.", type: "error" }));
       return false;
     }
 
-    // Проверка длины пароля
     if (form.password.length < 8) {
       dispatch(addToast({ message: "Password must be at least 8 characters long.", type: "error" }));
       return false;
@@ -41,7 +39,6 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Валидация формы перед отправкой
     if (!validateForm()) {
       return;
     }
@@ -80,12 +77,11 @@ const RegisterPage = () => {
           type="email"
           required
         />
-      <input
+        <input
           name="phone"
           value={form.phone}
           onChange={(e) => {
             const value = e.target.value;
-            // Убираем все нецифровые символы
             const numericValue = value.replace(/[^0-9]/g, '');
             handleChange({ target: { name: 'phone', value: numericValue } });
           }}
@@ -93,7 +89,6 @@ const RegisterPage = () => {
           type="tel"
           required
         />
-
         <input
           name="password"
           type="password"
@@ -112,6 +107,9 @@ const RegisterPage = () => {
         </button>
         {error && <p style={{ color: "#D81B60" }}>{error}</p>}
       </form>
+      <p>
+        Already have an account? <Link to="/login">Sign in</Link>
+      </p>
     </div>
   );
 };

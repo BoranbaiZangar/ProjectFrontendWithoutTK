@@ -1,15 +1,16 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { updateCartItem, removeFromCart, clearCart } from "../redux/cart";
 import { createOrder } from "../redux/orders";
 import { useNavigate } from "react-router-dom";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function CartPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const items = useSelector((state) => state.cart.items || []);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -25,9 +26,12 @@ export default function CartPage() {
   }
 
   function handleClearAll() {
-    if (window.confirm("Are you sure you want to clear the cart?")) {
-      dispatch(clearCart());
-    }
+    setShowClearModal(true);
+  }
+
+  function confirmClearCart() {
+    dispatch(clearCart());
+    setShowClearModal(false);
   }
 
   function handleCheckout() {
@@ -83,7 +87,9 @@ export default function CartPage() {
             ))}
           </ul>
 
-          <p><strong>Total:</strong> ₸{total.toFixed(2)}</p>
+          <p>
+            <strong>Total:</strong> ₸{total.toFixed(2)}
+          </p>
 
           <div style={{ marginTop: 16 }}>
             <button onClick={handleCheckout}>Place Order</button>
@@ -92,6 +98,14 @@ export default function CartPage() {
             </button>
           </div>
         </>
+      )}
+
+      {showClearModal && (
+        <ConfirmModal
+          message="Are you sure you want to clear the cart?"
+          onConfirm={confirmClearCart}
+          onCancel={() => setShowClearModal(false)}
+        />
       )}
     </div>
   );

@@ -514,15 +514,18 @@ const ProfilePage = () => {
           alt="Profile"
           className="profile-avatar"
         />
+        
         <div>
           <h2>{user.name}'s Profile</h2>
           <p>Role: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
         </div>
       </div>
+      
 
       {renderProfile()}
 
-      <div className="button-group">
+   
+ <div style={{ marginBottom: "10px" }}>
         <ImageUploader onUpload={handleAvatarUpload} reset={avatarReset} />
         {profileData?.avatar_url && (
           <button className="edit-profile-btn" onClick={handleAvatarDelete}>
@@ -530,7 +533,6 @@ const ProfilePage = () => {
           </button>
         )}
       </div>
-
       <div className="profile-section">
         <h3>Account Settings</h3>
         <form onSubmit={handleProfileSubmit} className="profile-form">

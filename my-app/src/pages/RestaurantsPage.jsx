@@ -19,7 +19,7 @@ const RestaurantsPage = () => {
   const isAdminOrModerator = user && (user.role === "admin" || user.role === "moderator");
 
   return (
-    <div className="container">
+    <div >
       <h2>Restaurants</h2>
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "#D81B60" }}>{error}</p>}

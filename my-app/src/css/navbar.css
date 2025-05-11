@@ -1,0 +1,78 @@
+/* Общие стили для навигационной панели */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 10px 20px;
+}
+
+/* Стили для логотипа */
+.navbar-logo {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: #8b4513;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+/* Стили для блока авторизации */
+.navbar-auth {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+}
+
+.navbar-user {
+  font-size: 14px;
+  color: #333333;
+  white-space: nowrap;
+}
+
+.navbar-btn {
+  padding: 8px 16px;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333333;
+  background-color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  white-space: nowrap;
+}
+
+.navbar-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.navbar-btn--primary {
+  background-color: #4a2c2a;
+  border-color: #4a2c2a;
+  color: #ffffff;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+  .navbar-logo {
+    font-size: 20px;
+  }
+  .navbar-auth {
+    flex-wrap: wrap;
+    gap: 5px;
+    min-width: auto;
+  }
+  .navbar-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

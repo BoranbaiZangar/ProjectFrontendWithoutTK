@@ -14,7 +14,6 @@ import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ConsoleRoleChanger from "./components/ConsoleRoleChanger";
-import CheckoutPage from "./pages/CheckoutPage";
 import SearchResults from "./pages/SearchResults";
 
 export default function AppRoutes() {
@@ -51,14 +50,7 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/checkout"
-          element={
-            <ProtectedRoute roles={["user"]}>
-              <CheckoutPage />
-            </ProtectedRoute>
-          }
-        />
+      
 
         <Route
           path="/orders"

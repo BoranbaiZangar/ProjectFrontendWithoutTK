@@ -1,0 +1,205 @@
+.admin-panel {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 20px 0 20px 0;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  transform: rotate(-1deg);
+}
+
+.admin-panel h2 {
+  font-family: "Georgia", serif;
+  font-size: 1.7rem;
+  color: #3e2a1d;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.no-users {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.2rem;
+  color: #1a1a1a;
+  text-align: center;
+  opacity: 0.7;
+  padding: 20px 0;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #ffffff;
+  border-radius: 15px 0 15px 0;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1rem;
+}
+
+.admin-table th {
+  background: #f5f5f5;
+  color: #3e2a1d;
+  font-weight: 600;
+  transform: skew(-5deg);
+}
+
+.admin-table td {
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.admin-table tr:hover td {
+  background: rgba(192, 160, 98, 0.1); /* Light gold hover effect */
+}
+
+.role-select {
+  font-family: "Times New Roman", Times, serif;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px 8px 0 0;
+  font-size: 1rem;
+  background: #ffffff;
+  color: #1a1a1a;
+  width: 100%;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%233E2A1D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.role-select:focus {
+  border-color: #c0a062; /* Gold */
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.ban-button,
+.unban-button {
+  font-family: "Georgia", serif;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px 5px 10px 5px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.ban-button {
+  background: #3E2A1D; /* Muted red, matching status-banned */
+  color: #fff;
+}
+
+.unban-button {
+  background: #c48a64;;; /* Muted green, matching status-active */
+  color: #fff;
+}
+
+.ban-button:hover {
+  background: #3E2A1D;; /* Slightly darker muted red */
+  transform: translateY(-2px);
+}
+
+.unban-button:hover {
+  background: #6eb571; /* Slightly darker muted green */
+  transform: translateY(-2px);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  color: #fff;
+}
+
+.status-active {
+  background: #559b59; /* Muted green */
+}
+
+.status-banned {
+  background: #000000; /* Muted red */
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  color: #fff;
+}
+
+.role-user {
+  background: #F7C815; /* Muted green */
+}
+
+.role-owner {
+  background:  #583E26; /* Pastel purple */
+}
+
+.role-admin {
+  background: #A78B71; /* Muted orange */
+}
+
+.role-courier {
+  background: #9C4A1A; /* Muted red */
+}
+
+.role-moderator {
+  background: #EC9704;/* Soft blue */
+}
+
+@media (max-width: 768px) {
+  .admin-panel {
+    padding: 20px;
+    max-width: 100%;
+    transform: rotate(0deg);
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .role-select,
+  .ban-button,
+  .unban-button {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+
+  .status-badge,
+  .role-badge {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+}

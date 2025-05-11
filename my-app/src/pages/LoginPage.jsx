@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Import Link
 import md5 from "md5";
 import { addToast } from "../redux/toast";
 
@@ -48,7 +48,7 @@ const LoginPage = () => {
       dispatch(addToast({ message: "Login successful!", type: "success" }));
       setTimeout(() => {
         navigate("/");
-      }, 1000);
+      }, 100);
     }
   }, [error, user, dispatch, navigate]);
 
@@ -78,6 +78,9 @@ const LoginPage = () => {
           {loading ? "Loading..." : "Login"}
         </button>
       </form>
+      <p>
+        No account? <Link to="/register">Sign up</Link>
+      </p>
     </div>
   );
 };

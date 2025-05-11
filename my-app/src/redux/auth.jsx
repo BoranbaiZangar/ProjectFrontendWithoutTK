@@ -1,5 +1,5 @@
 import md5 from "md5";
-import { v4 as uuidv4 } from "uuid"; // Импортируем uuid для генерации строковых id
+import { v4 as uuidv4 } from "uuid";
 
 const LOGIN_REQUEST = "auth/LOGIN_REQUEST";
 const LOGIN_SUCCESS = "auth/LOGIN_SUCCESS";
@@ -44,13 +44,12 @@ export default function authReducer(state = initialState, action) {
       return { ...state, user: updatedUser };
     case CLEAR_ERROR:
       return { ...state, error: null };
-      case UPDATE_USER:
-  localStorage.setItem("user", JSON.stringify(action.payload)); // Обновим localStorage тоже
-  return {
-    ...state,
-    user: action.payload,
-  };
-
+    case UPDATE_USER:
+      localStorage.setItem("user", JSON.stringify(action.payload));
+      return {
+        ...state,
+        user: action.payload,
+      };
     default:
       return state;
   }
@@ -103,7 +102,7 @@ export const register = (data) => async (dispatch) => {
     }
 
     const hashedPassword = md5(data.password);
-    const userId = uuidv4(); // Генерируем строковый id через uuid
+    const userId = uuidv4();
     const userData = {
       id: userId,
       name: data.name,
@@ -123,18 +122,15 @@ export const register = (data) => async (dispatch) => {
 
     if (!res.ok) throw new Error("An error occurred during registration.");
 
-    // const newUser = await res.json();
-
-    // Создаем дополнительные записи в зависимости от роли
     if (data.role === "user") {
       await fetch("http://localhost:5000/user_profiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: userId, // Используем строковый id
+          user_id: userId,
           address: "",
           avatar_url: "",
-          id: uuidv4(), // Генерируем id для записи
+          id: uuidv4(),
         }),
       });
     } else if (data.role === "courier") {
@@ -142,10 +138,10 @@ export const register = (data) => async (dispatch) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: userId, // Используем строковый id
+          user_id: userId,
           vehicle_type: "bicycle",
           is_available: true,
-          id: uuidv4(), // Генерируем id для записи
+          id: uuidv4(),
         }),
       });
     } else if (data.role === "owner") {
@@ -153,9 +149,9 @@ export const register = (data) => async (dispatch) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: userId, // Используем строковый id
+          user_id: userId,
           restaurant_id: null,
-          id: uuidv4(), // Генерируем id для записи
+          id: uuidv4(),
         }),
       });
     }

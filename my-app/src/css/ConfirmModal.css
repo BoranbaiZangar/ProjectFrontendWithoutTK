@@ -1,27 +1,29 @@
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    min-width: 100vw;
-    min-height: 100vh;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Высокий z-index для перекрытия других элементов */
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  pointer-events: none; /* Этот стиль блокирует взаимодействие с фоном */
+}
   
   .modal-content {
-    background-color: #ffffff;
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
-  }
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  max-width: 600px; /* Максимальная ширина модального окна */
+  width: 90%; /* Ширина по умолчанию */
+  text-align: center;
+  box-sizing: border-box;
+  pointer-events: all; /* Это позволяет взаимодействовать с модальным окном */
+}
+
   
   .modal-message {
     font-family: "Times New Roman", Times, serif;

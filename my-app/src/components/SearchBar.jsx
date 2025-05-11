@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../css/styles.css";
+import "../css/search.css";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");

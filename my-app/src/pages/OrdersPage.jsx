@@ -32,11 +32,12 @@ const OrdersPage = () => {
     }
   }, [dispatch, user]);
 
-  const handleAssignCourier = (orderId, order) => {
-    if (!order.courier_id) {
+  const handleAssignCourier = (orderId, courierId) => {
+    if (!courierId) {
       dispatch({
         type: "toast/ADD_TOAST",
         payload: {
+          id: Date.now(),
           message: "Please select a courier before assigning.",
           type: "error",
           position: "TOP_RIGHT",
@@ -45,10 +46,21 @@ const OrdersPage = () => {
       });
       return;
     }
-  
-    dispatch(assignCourier(orderId, order.courier_id));
+
+    dispatch(assignCourier(orderId, courierId)).then(() => {
+      dispatch({
+        type: "toast/ADD_TOAST",
+        payload: {
+          id: Date.now(),
+          message: "Courier assigned successfully!",
+          type: "success",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        },
+      });
+      dispatch(fetchOrders("ALL")); // Refresh orders to reflect updated courier_id
+    });
   };
-  
 
   const handleConfirmOrder = (orderId) => {
     dispatch(updateOrderStatus(orderId, "In Transit"));
@@ -82,7 +94,13 @@ const OrdersPage = () => {
     ) {
       dispatch({
         type: "toast/ADD_TOAST",
-        payload: { message: "Ratings must be between 1 and 5.", type: "error" },
+        payload: {
+          id: Date.now(),
+          message: "Ratings must be between 1 and 5.",
+          type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
+        },
       });
       return;
     }
@@ -91,8 +109,11 @@ const OrdersPage = () => {
       dispatch({
         type: "toast/ADD_TOAST",
         payload: {
+          id: Date.now(),
           message: "Cannot submit review: Restaurant ID is missing for this order.",
           type: "error",
+          position: "TOP_RIGHT",
+          autoClose: 5000,
         },
       });
       return;
@@ -340,4 +361,4 @@ const OrdersPage = () => {
   );
 };
 
-export default OrdersPage;
+export default OrdersPage; 

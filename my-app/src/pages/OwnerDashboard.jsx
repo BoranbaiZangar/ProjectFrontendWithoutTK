@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { addToast } from "../redux/toast";
+import ImageUploader from "../components/ImageUploader"; // Import ImageUploader
 import "../css/styles.css";
 
 const DEFAULT_AVATAR_URL = "https://static.wixstatic.com/media/35cf67_26f8bcd18f81440a93d08a0ece05c806~mv2.jpg/v1/fit/w_502,h_282,q_90,enc_avif,quality_auto/35cf67_26f8bcd18f81440a93d08a0ece05c806~mv2.jpg";
@@ -81,6 +82,11 @@ const OwnerDashboard = () => {
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
+  // Callback for ImageUploader to update avatar_url
+  const handleImageUpload = (base64) => {
+    setForm({ ...form, avatar_url: base64 });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -256,13 +262,15 @@ const OwnerDashboard = () => {
             <label>Restaurant Address</label>
           </div>
           <div className="input-wrapper">
-            <input
-              name="avatar_url"
-              value={form.avatar_url}
-              onChange={handleChange}
-              placeholder="Avatar URL (optional)"
-            />
-            <label>Avatar URL</label>
+            <ImageUploader onUpload={handleImageUpload} />
+            {form.avatar_url && (
+              <img
+                src={form.avatar_url}
+                alt="Preview"
+                className="restaurant-avatar-preview"
+                style={{ maxWidth: "100px", marginTop: "10px" }}
+              />
+            )}
           </div>
           <div className="input-wrapper">
             <textarea
@@ -283,17 +291,23 @@ const OwnerDashboard = () => {
             {editAvatar ? (
               <form onSubmit={handleSubmit}>
                 <div className="input-wrapper">
-                  <input
-                    name="avatar_url"
-                    value={form.avatar_url}
-                    onChange={handleChange}
-                    placeholder="Avatar URL"
+                  <ImageUploader
+                    mode="edit"
+                    editButtonText="Edit Restaurant Image" // Изменяем текст кнопки
+                    onUpload={handleImageUpload}
                   />
-                  <label>Avatar URL</label>
+                  {form.avatar_url && (
+                    <img
+                      src={form.avatar_url}
+                      alt="Preview"
+                      className="restaurant-avatar-preview"
+                      style={{ maxWidth: "100px", marginTop: "10px" }}
+                    />
+                  )}
                 </div>
                 <div className="button-group">
                   <button type="submit" disabled={loading}>
-                    {loading ? "Updating..." : "Save Avatar"}
+                    {loading ? "Updating..." : "Save Restaurant Image"}
                   </button>
                   <button
                     type="button"
@@ -318,7 +332,7 @@ const OwnerDashboard = () => {
                   />
                 </div>
                 <button onClick={() => setEditAvatar(true)} disabled={loading}>
-                  Edit Avatar
+                  Edit Restaurant Image
                 </button>
               </div>
             )}
